@@ -1,0 +1,30 @@
+# Frontend
+node_modules/
+.next/
+out/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+coverage/
+.cache/
+.vercel/
+.turbo/
+
+# Backend
+__pycache__/
+*.pyc
+.venv/
+venv/
+.envrc
+.pytest_cache/
+
+# General
+_backup_before_restructure/
