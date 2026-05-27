@@ -1,8 +1,25 @@
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { TrustBar } from "@/components/landing/TrustBar";
+import { FeatureGrid } from "@/components/landing/FeatureGrid";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { PreviewGrid } from "@/components/landing/PreviewGrid";
+import { FinalCTA } from "@/components/landing/FinalCTA";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-page text-text-primary">
-      <h1 className="text-4xl font-bold text-primary mb-4">InjSight AI</h1>
-      <p className="text-xl text-text-secondary">Foundation Setup Complete. Ready for Landing Page implementation.</p>
-    </main>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <HeroSection />
+        <TrustBar />
+        <FeatureGrid />
+        <HowItWorks />
+        <PreviewGrid />
+        <FinalCTA />
+      </main>
+      <Footer />
+    </div>
   );
 }
