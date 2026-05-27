@@ -29,6 +29,10 @@ export function Navbar() {
                 InjSight AI
               </span>
             </Link>
+            <div className="ml-4 hidden lg:flex items-center space-x-2 px-2.5 py-1 bg-success/10 border border-success/20 rounded-full">
+              <div className="w-1 h-1 rounded-full bg-success animate-pulse" />
+              <span className="text-[9px] font-bold text-success uppercase tracking-widest">Secure & Read-Only</span>
+            </div>
           </div>
 
           {/* Desktop Navigation */}

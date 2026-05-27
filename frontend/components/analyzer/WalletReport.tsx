@@ -6,6 +6,7 @@ import { AIReportCard } from "./AIReportCard";
 import { TokenBalanceTable } from "../table/TokenBalanceTable";
 import { PortfolioCompositionCard } from "../dashboard/PortfolioCompositionCard";
 import { SuggestedNextStepsCard } from "../dashboard/SuggestedNextStepsCard";
+import { SecurityBadgeGroup } from "../ui/SecurityBadgeGroup";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { CheckCircle2, ChevronRight, Copy, Share2, Download } from "lucide-react";
@@ -53,6 +54,11 @@ export function WalletReport({ data }: WalletReportProps) {
             Save Analysis
           </Button>
         </div>
+      </div>
+
+      {/* Trust Signals */}
+      <div className="flex justify-start">
+        <SecurityBadgeGroup />
       </div>
 
       {/* Main Grid */}
