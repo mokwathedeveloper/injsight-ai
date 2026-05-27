@@ -13,6 +13,7 @@ const badgeVariants = cva(
         warning: "border-transparent bg-warning/20 text-warning border border-warning/30",
         error: "border-transparent bg-error/20 text-error border border-error/30",
         outline: "text-text-primary border-border",
+        price: "border-transparent bg-accent/10 text-accent border border-accent/20 font-mono",
       },
     },
     defaultVariants: {

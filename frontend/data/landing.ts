@@ -12,6 +12,7 @@ export const landingData: LandingData = {
     { label: "How It Works", href: "#how-it-works" },
     { label: "Demo", href: "/demo" },
     { label: "Analyze", href: "/analyze" },
+    { label: "Holdings", href: "/token-balance" },
     { label: "Pricing", href: "#pricing" },
   ],
   features: [
