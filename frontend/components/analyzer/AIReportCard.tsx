@@ -1,7 +1,13 @@
+"use client";
+
 import * as React from "react";
 import { Card } from "@/components/ui/Card";
 import { WalletAnalysisResult } from "@/types/wallet-analyzer";
-import { Brain, Sparkles, AlertTriangle } from "lucide-react";
+import { Brain, Sparkles, AlertTriangle, ChevronRight } from "lucide-react";
+import { AIReportSection } from "../report/AIReportSection";
+import { AIObservationList } from "../report/AIObservationList";
+import { AIReportDisclaimer } from "../report/AIReportDisclaimer";
+import { MOCK_AI_REPORT } from "@/data/ai-report-mock";
 import { cn } from "@/lib/utils";
 
 interface AIReportCardProps {
@@ -9,41 +15,83 @@ interface AIReportCardProps {
 }
 
 export function AIReportCard({ data }: AIReportCardProps) {
+  // In a real app, we would fetch or generate this based on 'data.address'
+  // For now, we use the high-fidelity mock report
+  const report = MOCK_AI_REPORT;
+
   return (
     <Card className="p-0 border-border bg-card overflow-hidden h-full flex flex-col">
-      <div className="border-b border-border p-5 bg-hover/30 flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-          <Brain size={20} className="text-accent" />
+      <div className="border-b border-border p-5 bg-hover/30 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+            <Brain size={20} className="text-accent" />
+          </div>
+          <span className="text-sm font-bold text-text-primary uppercase tracking-widest">AI Intelligence Report</span>
         </div>
-        <span className="text-sm font-bold text-text-primary uppercase tracking-widest">AI Intelligence Report</span>
+        <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 bg-success/10 border border-success/20 rounded-full">
+           <Sparkles size={10} className="text-success" />
+           <span className="text-[9px] font-bold text-success uppercase">GPT-4 Turbo</span>
+        </div>
       </div>
       
-      <div className="p-8 space-y-10 flex-1 overflow-y-auto">
-        {data.insights.map((insight, index) => (
-          <div key={index} className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-500" style={{ animationDelay: `${index * 150}ms` }}>
-            <div className="flex items-center space-x-3">
-              <div className={cn(
-                "p-2 rounded-lg border",
-                insight.category === "risk" ? "bg-error/10 text-error border-error/20" : 
-                insight.category === "opportunity" ? "bg-success/10 text-success border-success/20" : "bg-primary/10 text-primary border-primary/20"
-              )}>
-                {insight.category === "risk" ? <AlertTriangle size={16} /> : <Sparkles size={16} />}
-              </div>
-              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">{insight.title}</h3>
-            </div>
-            <p className="text-sm text-text-secondary leading-relaxed pl-12 border-l-2 border-border/50 italic">
-              &quot;{insight.content}&quot;
-            </p>
-          </div>
-        ))}
+      <div className="p-8 space-y-10 flex-1 overflow-y-auto custom-scrollbar">
+        {/* Summary Section */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <AIReportSection 
+            title={report.summary.title} 
+            content={report.summary.content}
+          >
+            <AIObservationList observations={report.summary.observations} />
+          </AIReportSection>
+        </div>
 
-        <div className="pt-8 border-t border-border/50">
+        {/* Risk Section */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+          <AIReportSection 
+            title={report.risk.title} 
+            content={report.risk.content}
+          >
+            <AIObservationList observations={report.risk.observations} />
+          </AIReportSection>
+        </div>
+
+        {/* Concentration Section */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+          <AIReportSection 
+            title={report.concentration.title} 
+            content={report.concentration.content}
+          >
+            <AIObservationList observations={report.concentration.observations} />
+          </AIReportSection>
+        </div>
+
+        {/* Next Steps */}
+        <div className="pt-8 border-t border-border/50 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-450">
+          <h3 className="text-sm font-bold text-text-primary uppercase tracking-widest mb-6 px-1">
+            Suggested Next Steps
+          </h3>
+          <div className="grid grid-cols-1 gap-3">
+            {report.nextSteps.map((step, i) => (
+              <div key={i} className="flex items-center gap-4 p-4 bg-hover/20 rounded-xl border border-border/50 group hover:border-primary/30 transition-all cursor-pointer">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                  {i + 1}
+                </div>
+                <p className="text-xs text-text-secondary group-hover:text-text-primary transition-colors flex-1">
+                  {step}
+                </p>
+                <ChevronRight size={14} className="text-text-disabled group-hover:text-primary transition-colors" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Technical Summary */}
+        <div className="pt-4 animate-in fade-in duration-1000 delay-500">
           <div className="bg-hover/20 rounded-xl p-6 border border-border-strong relative overflow-hidden">
-             {/* Decorative glow */}
              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
              
-             <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">Technical Summary</div>
-             <div className="grid grid-cols-2 gap-4">
+             <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">Technical Provenance</div>
+             <div className="grid grid-cols-2 gap-4 relative z-10">
                <div>
                  <div className="text-[8px] text-text-disabled uppercase font-bold mb-1 tracking-tighter">Network</div>
                  <div className="text-[10px] font-mono text-text-primary uppercase">{data.network}</div>
@@ -59,10 +107,15 @@ export function AIReportCard({ data }: AIReportCardProps) {
              </div>
           </div>
         </div>
+
+        {/* Disclaimer */}
+        <div className="pt-4">
+          <AIReportDisclaimer />
+        </div>
       </div>
       
-      <div className="bg-page p-4 text-[10px] text-text-disabled text-center italic border-t border-border uppercase tracking-tight">
-        InjSight AI is an informational platform. AI insights are not financial advice.
+      <div className="bg-page p-4 text-[9px] text-text-disabled text-center font-bold border-t border-border uppercase tracking-widest">
+        Automated Intelligence Report — Secure & Read-Only
       </div>
     </Card>
   );
