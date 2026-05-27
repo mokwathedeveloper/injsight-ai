@@ -25,7 +25,7 @@ export function RecentAnalysisTable({ data }: RecentAnalysisTableProps) {
           {data.map((item) => (
             <Link 
               key={item.id} 
-              href={`/analyze?address=${item.address}`}
+              href={`/dashboard/wallets/${item.id}`}
               className="flex items-center justify-between p-4 hover:bg-hover transition-colors group"
             >
               <div className="flex items-center gap-3">

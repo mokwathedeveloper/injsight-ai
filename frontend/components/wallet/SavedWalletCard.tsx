@@ -108,7 +108,7 @@ export function SavedWalletCard({ wallet, onRefresh, onDelete, onEdit }: SavedWa
           <span>Synced {wallet.lastAnalyzed}</span>
         </div>
         
-        <Link href={`/analyze?address=${wallet.address}`}>
+        <Link href={`/dashboard/wallets/${wallet.id}`}>
           <button className="flex items-center gap-1.5 text-[10px] font-extrabold text-primary hover:text-primary-hover uppercase tracking-widest group/link">
             <span>Details</span>
             <ExternalLink size={12} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
