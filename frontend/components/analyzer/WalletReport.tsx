@@ -3,11 +3,13 @@ import { WalletAnalysisResult } from "@/types/wallet-analyzer";
 import { PortfolioDashboard } from "../dashboard/PortfolioDashboard";
 import { RiskScoreCard } from "./RiskScoreCard";
 import { AIReportCard } from "./AIReportCard";
+import { TokenBalanceTable } from "../table/TokenBalanceTable";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { CheckCircle2, ChevronRight, Copy, Share2, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface WalletReportProps {
   data: WalletAnalysisResult;
@@ -76,12 +78,12 @@ export function WalletReport({ data }: WalletReportProps) {
                 <h3 className="text-xs font-bold text-text-primary uppercase tracking-widest">Top Holdings</h3>
               </div>
               <div className="p-0">
-                {data.holdings.map((token, index) => (
+                {data.holdings.slice(0, 5).map((token, index) => (
                   <div 
                     key={token.id} 
                     className={cn(
                       "flex items-center justify-between p-6 hover:bg-hover/30 transition-colors",
-                      index !== data.holdings.length - 1 && "border-b border-border/50"
+                      index !== Math.min(data.holdings.length, 5) - 1 && "border-b border-border/50"
                     )}
                   >
                     <div className="flex items-center space-x-3">
@@ -105,10 +107,12 @@ export function WalletReport({ data }: WalletReportProps) {
                 ))}
               </div>
               <div className="p-4 bg-hover/20">
-                <button className="w-full py-2.5 text-[11px] font-bold text-text-secondary hover:text-primary transition-colors flex items-center justify-center space-x-2">
-                  <span>Explore Full Portfolio</span>
-                  <ChevronRight size={14} />
-                </button>
+                <Link href="/token-balance">
+                  <button className="w-full py-2.5 text-[11px] font-bold text-text-secondary hover:text-primary transition-colors flex items-center justify-center space-x-2">
+                    <span>Explore Full Portfolio</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </Link>
               </div>
            </Card>
 
@@ -130,6 +134,11 @@ export function WalletReport({ data }: WalletReportProps) {
               </div>
            </Card>
         </div>
+      </div>
+
+      {/* Detailed Holdings Section */}
+      <div className="pt-8">
+        <TokenBalanceTable tokens={data.holdings} />
       </div>
     </div>
   );
