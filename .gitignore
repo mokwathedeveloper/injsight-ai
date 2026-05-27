@@ -28,3 +28,4 @@ venv/
 
 # General
 _backup_before_restructure/
+*.tsbuildinfo
