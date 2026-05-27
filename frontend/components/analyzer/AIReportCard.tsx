@@ -65,26 +65,6 @@ export function AIReportCard({ data }: AIReportCardProps) {
           </AIReportSection>
         </div>
 
-        {/* Next Steps */}
-        <div className="pt-8 border-t border-border/50 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-450">
-          <h3 className="text-sm font-bold text-text-primary uppercase tracking-widest mb-6 px-1">
-            Suggested Next Steps
-          </h3>
-          <div className="grid grid-cols-1 gap-3">
-            {report.nextSteps.map((step, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-hover/20 rounded-xl border border-border/50 group hover:border-primary/30 transition-all cursor-pointer">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                  {i + 1}
-                </div>
-                <p className="text-xs text-text-secondary group-hover:text-text-primary transition-colors flex-1">
-                  {step}
-                </p>
-                <ChevronRight size={14} className="text-text-disabled group-hover:text-primary transition-colors" />
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Technical Summary */}
         <div className="pt-4 animate-in fade-in duration-1000 delay-500">
           <div className="bg-hover/20 rounded-xl p-6 border border-border-strong relative overflow-hidden">

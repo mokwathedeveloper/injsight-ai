@@ -5,6 +5,7 @@ import { RiskScoreCard } from "./RiskScoreCard";
 import { AIReportCard } from "./AIReportCard";
 import { TokenBalanceTable } from "../table/TokenBalanceTable";
 import { PortfolioCompositionCard } from "../dashboard/PortfolioCompositionCard";
+import { SuggestedNextStepsCard } from "../dashboard/SuggestedNextStepsCard";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { CheckCircle2, ChevronRight, Copy, Share2, Download } from "lucide-react";
@@ -135,6 +136,11 @@ export function WalletReport({ data }: WalletReportProps) {
               </div>
            </Card>
         </div>
+      </div>
+
+      {/* Actionable Insights Section */}
+      <div className="pt-8">
+        <SuggestedNextStepsCard />
       </div>
 
       {/* Composition Section */}
