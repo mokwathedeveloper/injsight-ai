@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight } from "lucide-react";
 
@@ -22,14 +23,16 @@ export function FinalCTA() {
             </div>
             
             <div className="flex-shrink-0">
-              <Button 
-                variant="primary" 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-lg font-bold group px-10 shadow-xl"
-              >
-                <span>Analyze Wallet Now</span>
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link href="/analyze">
+                <Button 
+                  variant="primary" 
+                  size="lg" 
+                  className="bg-white text-primary hover:bg-white/90 text-lg font-bold group px-10 shadow-xl"
+                >
+                  <span>Analyze Wallet Now</span>
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

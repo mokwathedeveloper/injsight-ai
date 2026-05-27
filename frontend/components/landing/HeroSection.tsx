@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { landingData } from "@/data/landing";
@@ -39,22 +40,26 @@ export function HeroSection() {
                   placeholder="inj1...walletaddresshere"
                   className="h-[52px] pl-4 pr-32 bg-card/50 backdrop-blur-sm border-border-strong font-mono"
                 />
-                <Button 
-                  className="absolute right-1 top-1 bottom-1 px-6 rounded"
-                  size="default"
-                >
-                  Analyze Wallet
-                </Button>
+                <Link href="/analyze">
+                  <Button 
+                    className="absolute right-1 top-1 bottom-1 px-6 rounded"
+                    size="default"
+                  >
+                    Analyze Wallet
+                  </Button>
+                </Link>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
-              <button className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors text-sm font-medium group">
-                <div className="w-8 h-8 rounded-full bg-hover flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-text-secondary border-b-[6px] border-b-transparent ml-1 group-hover:border-l-primary transition-colors" />
-                </div>
-                <span>{landingData.hero.secondaryCta}</span>
-              </button>
+              <Link href="/demo">
+                <button className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors text-sm font-medium group">
+                  <div className="w-8 h-8 rounded-full bg-hover flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-text-secondary border-b-[6px] border-b-transparent ml-1 group-hover:border-l-primary transition-colors" />
+                  </div>
+                  <span>{landingData.hero.secondaryCta}</span>
+                </button>
+              </Link>
               
               <div className="flex items-center space-x-4 text-xs text-text-disabled">
                 <div className="flex items-center space-x-1">

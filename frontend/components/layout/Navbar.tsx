@@ -49,9 +49,11 @@ export function Navbar() {
             <Button variant="ghost" size="sm">
               Log in
             </Button>
-            <Button variant="primary" size="sm">
-              Get Started Free
-            </Button>
+            <Link href="/analyze">
+              <Button variant="primary" size="sm">
+                Get Started Free
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
