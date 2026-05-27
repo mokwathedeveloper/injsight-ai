@@ -36,6 +36,21 @@ export default function WalletsPage() {
     setWallets(wallets.filter(w => w.id !== id));
   };
 
+  const handleRefreshWallet = (id: string) => {
+    setWallets(wallets.map(w => 
+      w.id === id ? { ...w, lastAnalyzed: "Just now" } : w
+    ));
+  };
+
+  const handleEditWallet = (id: string) => {
+    const newLabel = prompt("Enter new label:");
+    if (newLabel) {
+      setWallets(wallets.map(w => 
+        w.id === id ? { ...w, label: newLabel } : w
+      ));
+    }
+  };
+
   return (
     <AppShell>
       <div className="space-y-8 animate-in fade-in duration-700">
@@ -83,6 +98,8 @@ export default function WalletsPage() {
               key={wallet.id} 
               wallet={wallet} 
               onDelete={handleDeleteWallet}
+              onRefresh={handleRefreshWallet}
+              onEdit={handleEditWallet}
             />
           ))}
 
