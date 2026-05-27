@@ -10,10 +10,9 @@ export const landingData: LandingData = {
   navigation: [
     { label: "Features", href: "#features" },
     { label: "How It Works", href: "#how-it-works" },
-    { label: "Reports", href: "#reports" },
+    { label: "Demo", href: "/demo" },
+    { label: "Analyze", href: "/analyze" },
     { label: "Pricing", href: "#pricing" },
-    { label: "Docs", href: "/docs" },
-    { label: "About", href: "/about" },
   ],
   features: [
     {

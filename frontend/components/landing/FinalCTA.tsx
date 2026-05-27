@@ -22,7 +22,7 @@ export function FinalCTA() {
               </p>
             </div>
             
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex flex-col items-center gap-4">
               <Link href="/analyze">
                 <Button 
                   variant="primary" 
@@ -32,6 +32,9 @@ export function FinalCTA() {
                   <span>Analyze Wallet Now</span>
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
+              </Link>
+              <Link href="/demo" className="text-white/70 hover:text-white text-sm font-medium transition-colors">
+                Try Demo Wallet instead
               </Link>
             </div>
           </div>
