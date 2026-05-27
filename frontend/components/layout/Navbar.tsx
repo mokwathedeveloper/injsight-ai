@@ -50,10 +50,12 @@ export function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
-            <Link href="/analyze">
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/signup">
               <Button variant="primary" size="sm">
                 Get Started Free
               </Button>
@@ -91,12 +93,16 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-4 flex flex-col space-y-2 px-3">
-            <Button variant="ghost" className="w-full justify-start">
-              Log in
-            </Button>
-            <Button variant="primary" className="w-full">
-              Get Started Free
-            </Button>
+            <Link href="/login">
+              <Button variant="ghost" className="w-full justify-start" onClick={() => setIsOpen(false)}>
+                Log in
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button variant="primary" className="w-full" onClick={() => setIsOpen(false)}>
+                Get Started Free
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
