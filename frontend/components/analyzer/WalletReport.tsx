@@ -1,6 +1,6 @@
 import * as React from "react";
 import { WalletAnalysisResult } from "@/types/wallet-analyzer";
-import { PortfolioSummaryCard } from "./PortfolioSummaryCard";
+import { PortfolioDashboard } from "../dashboard/PortfolioDashboard";
 import { RiskScoreCard } from "./RiskScoreCard";
 import { AIReportCard } from "./AIReportCard";
 import { Card } from "@/components/ui/Card";
@@ -53,9 +53,13 @@ export function WalletReport({ data }: WalletReportProps) {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Metrics & Risk */}
+        {/* Top: Portfolio Dashboard (Full Width) */}
+        <div className="lg:col-span-12">
+          <PortfolioDashboard data={data} />
+        </div>
+
+        {/* Left Column: Risk */}
         <div className="lg:col-span-4 flex flex-col space-y-8">
-          <PortfolioSummaryCard data={data} />
           <RiskScoreCard data={data} />
         </div>
 
