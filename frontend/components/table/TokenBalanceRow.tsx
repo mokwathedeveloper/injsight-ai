@@ -22,7 +22,13 @@ export function TokenBalanceRow({ token }: TokenBalanceRowProps) {
   }).format(token.valueUsd);
 
   return (
-    <div className="group flex items-center p-4 hover:bg-hover transition-colors border-b border-border/50 last:border-0">
+    <div className={cn(
+      "group flex items-center p-4 hover:bg-hover transition-colors border-b border-border/50 last:border-0 relative overflow-hidden",
+      token.percentOfPortfolio > 20 && "bg-primary/[0.02]"
+    )}>
+      {token.percentOfPortfolio > 20 && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(0,102,255,0.5)]" />
+      )}
       {/* Token Info */}
       <div className="flex-[2] flex items-center space-x-3 min-w-[180px]">
         <div className="w-10 h-10 rounded-xl bg-hover border border-border flex items-center justify-center text-xs font-bold text-text-primary group-hover:border-primary/50 transition-colors">
@@ -59,11 +65,12 @@ export function TokenBalanceRow({ token }: TokenBalanceRowProps) {
         </div>
       </div>
 
-      {/* USD Value */}
       <div className="flex-1 min-w-[120px]">
         <div className="text-sm font-bold text-text-primary font-mono">{formattedValue}</div>
-        <div className="text-[10px] text-text-disabled font-medium mt-0.5">
-          ${token.priceUsd.toLocaleString()} / {token.symbol}
+        <div className="mt-1">
+          <Badge variant="price" className="text-[9px] py-0 px-1.5 lowercase">
+            ${token.priceUsd.toLocaleString()}
+          </Badge>
         </div>
       </div>
 
