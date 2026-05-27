@@ -61,6 +61,8 @@ export function NextStepRow({ action, index }: NextStepRowProps) {
           target={action.isExternal ? "_blank" : undefined} 
           rel={action.isExternal ? "noopener noreferrer" : undefined}
           className="w-full md:w-auto"
+          aria-label={action.isExternal ? `Open ${action.actionLabel} in a new tab` : action.actionLabel}
+          title={action.isExternal ? "External Injective Protocol" : "Internal App View"}
         >
           <Button 
             variant={action.category === 'risk' || action.category === 'security' ? 'secondary' : 'primary'} 
