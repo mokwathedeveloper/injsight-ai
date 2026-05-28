@@ -13,9 +13,10 @@ interface ReportHeaderProps {
   walletLabel?: string;
   date: string;
   onExport?: () => void;
+  onShare?: () => void;
 }
 
-export function ReportHeader({ title, walletAddress, walletLabel, date, onExport }: ReportHeaderProps) {
+export function ReportHeader({ title, walletAddress, walletLabel, date, onExport, onShare }: ReportHeaderProps) {
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -61,7 +62,11 @@ export function ReportHeader({ title, walletAddress, walletLabel, date, onExport
 
         {/* Action Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="secondary" className="h-11 px-5 gap-2 border-border-strong font-bold text-xs uppercase tracking-widest group">
+          <Button 
+            variant="secondary" 
+            className="h-11 px-5 gap-2 border-border-strong font-bold text-xs uppercase tracking-widest group"
+            onClick={onShare}
+          >
             <Share2 size={14} className="text-text-disabled group-hover:text-primary transition-colors" />
             <span>Share</span>
           </Button>

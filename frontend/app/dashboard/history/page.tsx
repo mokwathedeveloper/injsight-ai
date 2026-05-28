@@ -4,13 +4,17 @@ import * as React from "react";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { AnalysisHistoryTable } from "@/components/dashboard/AnalysisHistoryTable";
 import { AnalysisHistoryToolbar } from "@/components/dashboard/AnalysisHistoryToolbar";
+import { ShareReportModal } from "@/components/reports/ShareReportModal";
 import { MOCK_ANALYSIS_HISTORY } from "@/data/analysis-history-mock";
-import { AnalysisHistoryFilters } from "@/types/analysis-history";
+import { AnalysisHistoryFilters, AnalysisHistoryEntry } from "@/types/analysis-history";
 import { History, Shield, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function HistoryPage() {
   const [entries, setEntries] = React.useState(MOCK_ANALYSIS_HISTORY);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [selectedEntry, setSelectedEntry] = React.useState<AnalysisHistoryEntry | null>(null);
+  
   const [filters, setFilters] = React.useState<AnalysisHistoryFilters>({
     search: "",
     riskLevel: "All",
@@ -31,6 +35,11 @@ export default function HistoryPage() {
 
   const handleDeleteEntry = (id: string) => {
     setEntries(entries.filter(e => e.id !== id));
+  };
+
+  const handleShare = (entry: AnalysisHistoryEntry) => {
+    setSelectedEntry(entry);
+    setIsShareModalOpen(true);
   };
 
   return (
@@ -69,6 +78,7 @@ export default function HistoryPage() {
           <AnalysisHistoryTable 
             entries={filteredEntries} 
             onDelete={handleDeleteEntry}
+            onShare={handleShare}
           />
           
           <div className="p-6 bg-hover/10 border border-border/50 rounded-2xl flex items-start gap-4">
@@ -85,6 +95,13 @@ export default function HistoryPage() {
           </div>
         </div>
       </div>
+
+      <ShareReportModal 
+        isOpen={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)} 
+        reportId={selectedEntry?.reportId}
+        reportTitle={selectedEntry?.label}
+      />
     </AppShell>
   );
 }

@@ -6,6 +6,7 @@ import { ReportTable } from "@/components/reports/ReportTable";
 import { ReportFilters } from "@/components/reports/ReportFilters";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ExportModal } from "@/components/reports/ExportModal";
+import { ShareReportModal } from "@/components/reports/ShareReportModal";
 import { MOCK_REPORTS, MOCK_REPORT_HUB_STATS } from "@/data/reports-mock";
 import { AIReportHubEntry } from "@/types/reports";
 import { FileText, ShieldAlert, Download, Clock } from "lucide-react";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 export default function ReportsPage() {
   const [reports, setReports] = React.useState(MOCK_REPORTS);
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [selectedReport, setSelectedReport] = React.useState<AIReportHubEntry | undefined>(undefined);
   const stats = MOCK_REPORT_HUB_STATS;
 
@@ -24,6 +26,11 @@ export default function ReportsPage() {
   const handleOpenExport = (report?: AIReportHubEntry) => {
     setSelectedReport(report);
     setIsExportModalOpen(true);
+  };
+
+  const handleOpenShare = (report: AIReportHubEntry) => {
+    setSelectedReport(report);
+    setIsShareModalOpen(true);
   };
 
   return (
@@ -90,6 +97,7 @@ export default function ReportsPage() {
             reports={reports} 
             onDelete={handleDeleteReport} 
             onExport={handleOpenExport}
+            onShare={handleOpenShare}
           />
           
           <div className="p-6 bg-hover/10 border border-border/50 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -112,6 +120,13 @@ export default function ReportsPage() {
         onClose={() => setIsExportModalOpen(false)} 
         reportTitle={selectedReport?.title}
         walletAddress={selectedReport?.walletAddress}
+      />
+
+      <ShareReportModal 
+        isOpen={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)} 
+        reportId={selectedReport?.id}
+        reportTitle={selectedReport?.title}
       />
     </AppShell>
   );

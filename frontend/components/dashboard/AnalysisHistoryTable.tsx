@@ -11,10 +11,11 @@ import { Button } from "@/components/ui/Button";
 interface AnalysisHistoryTableProps {
   entries: AnalysisHistoryEntry[];
   onDelete?: (id: string) => void;
+  onShare?: (entry: AnalysisHistoryEntry) => void;
   className?: string;
 }
 
-export function AnalysisHistoryTable({ entries, onDelete, className }: AnalysisHistoryTableProps) {
+export function AnalysisHistoryTable({ entries, onDelete, onShare, className }: AnalysisHistoryTableProps) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const handleSelect = (id: string) => {
@@ -98,6 +99,7 @@ export function AnalysisHistoryTable({ entries, onDelete, className }: AnalysisH
             key={entry.id} 
             entry={entry} 
             onDelete={onDelete}
+            onShare={onShare}
             isSelected={selectedIds.has(entry.id)}
             onSelect={handleSelect}
           />
