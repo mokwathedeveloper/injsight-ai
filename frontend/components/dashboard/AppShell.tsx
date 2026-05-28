@@ -15,11 +15,11 @@ import {
   X,
   Search,
   Zap,
-  FileText,
+  FileText, 
   Monitor,
-  TrendingUp
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  TrendingUp,
+  CreditCard
+  } from "lucide-react";import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 
 interface NavItemProps {
@@ -58,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/dashboard/watchlist", icon: Monitor, label: "Watchlist" },
     { href: "/dashboard/reports", icon: FileText, label: "Intelligence Reports" },
     { href: "/dashboard/history", icon: History, label: "Analysis History" },
+    { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
     { href: "/dashboard/alerts", icon: Bell, label: "Alerts" },
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },
   ];
