@@ -46,9 +46,11 @@ export function ReportTable({ reports, onDelete }: ReportTableProps) {
                       <FileText size={18} />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors cursor-pointer">
-                        {report.title}
-                      </div>
+                      <Link href={`/dashboard/reports/${report.id}`}>
+                        <div className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors cursor-pointer">
+                          {report.title}
+                        </div>
+                      </Link>
                       <div className="text-[10px] text-text-disabled mt-0.5">
                         Generated {new Date(report.dateGenerated).toLocaleDateString()} • {report.sizeKb}kb
                       </div>
@@ -84,9 +86,11 @@ export function ReportTable({ reports, onDelete }: ReportTableProps) {
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-hover rounded-lg text-text-disabled hover:text-primary transition-colors" title="View Report">
-                      <Eye size={16} />
-                    </button>
+                    <Link href={`/dashboard/reports/${report.id}`}>
+                      <button className="p-2 hover:bg-hover rounded-lg text-text-disabled hover:text-primary transition-colors" title="View Report">
+                        <Eye size={16} />
+                      </button>
+                    </Link>
                     <button className="p-2 hover:bg-hover rounded-lg text-text-disabled hover:text-text-primary transition-colors" title="Download">
                       <Download size={16} />
                     </button>
