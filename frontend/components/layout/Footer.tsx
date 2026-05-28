@@ -82,6 +82,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/security"
+                  className="text-text-secondary text-sm hover:text-text-primary transition-colors"
+                >
+                  Security
+                </Link>
+              </li>
             </ul>
           </div>
 
