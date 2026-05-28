@@ -15,7 +15,8 @@ import {
   X,
   Search,
   Zap,
-  FileText
+  FileText,
+  Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -53,6 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigation = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
     { href: "/dashboard/wallets", icon: Wallet, label: "My Wallets" },
+    { href: "/dashboard/watchlist", icon: Monitor, label: "Watchlist" },
     { href: "/dashboard/reports", icon: FileText, label: "Intelligence Reports" },
     { href: "/dashboard/history", icon: History, label: "Analysis History" },
     { href: "/dashboard/alerts", icon: Bell, label: "Alerts" },
