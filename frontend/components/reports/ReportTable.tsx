@@ -21,9 +21,10 @@ import Link from "next/link";
 interface ReportTableProps {
   reports: AIReportHubEntry[];
   onDelete?: (id: string) => void;
+  onExport?: (report: AIReportHubEntry) => void;
 }
 
-export function ReportTable({ reports, onDelete }: ReportTableProps) {
+export function ReportTable({ reports, onDelete, onExport }: ReportTableProps) {
   return (
     <Card className="p-0 border-border bg-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -91,7 +92,11 @@ export function ReportTable({ reports, onDelete }: ReportTableProps) {
                         <Eye size={16} />
                       </button>
                     </Link>
-                    <button className="p-2 hover:bg-hover rounded-lg text-text-disabled hover:text-text-primary transition-colors" title="Download">
+                    <button 
+                      className="p-2 hover:bg-hover rounded-lg text-text-disabled hover:text-text-primary transition-colors" 
+                      title="Download"
+                      onClick={() => onExport?.(report)}
+                    >
                       <Download size={16} />
                     </button>
                     <button 

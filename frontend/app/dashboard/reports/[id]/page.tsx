@@ -6,11 +6,14 @@ import { ReportHeader } from "@/components/reports/ReportHeader";
 import { AIReportCard } from "@/components/analyzer/AIReportCard";
 import { RiskScoreCard } from "@/components/analyzer/RiskScoreCard";
 import { PortfolioCompositionCard } from "@/components/dashboard/PortfolioCompositionCard";
+import { ExportModal } from "@/components/reports/ExportModal";
 import { MOCK_REPORTS } from "@/data/reports-mock";
 import { DEMO_WALLETS } from "@/data/demo-wallets";
 import { WalletAnalysisResult } from "@/types/wallet-analyzer";
 
 export default function ReportDetailPage({ params }: { params: { id: string } }) {
+  const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  
   // In a real app, fetch report by id. For now, use mock whale data.
   const reportHubData = MOCK_REPORTS[0];
   
@@ -25,6 +28,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
           walletAddress={reportHubData.walletAddress}
           walletLabel={reportHubData.walletLabel}
           date={reportHubData.dateGenerated}
+          onExport={() => setIsExportModalOpen(true)}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -62,6 +66,13 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
            </div>
         </div>
       </div>
+
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        reportTitle={reportHubData.title}
+        walletAddress={reportHubData.walletAddress}
+      />
     </AppShell>
   );
 }

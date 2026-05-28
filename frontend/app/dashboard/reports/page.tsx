@@ -5,16 +5,25 @@ import { AppShell } from "@/components/dashboard/AppShell";
 import { ReportTable } from "@/components/reports/ReportTable";
 import { ReportFilters } from "@/components/reports/ReportFilters";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { ExportModal } from "@/components/reports/ExportModal";
 import { MOCK_REPORTS, MOCK_REPORT_HUB_STATS } from "@/data/reports-mock";
+import { AIReportHubEntry } from "@/types/reports";
 import { FileText, ShieldAlert, Download, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function ReportsPage() {
   const [reports, setReports] = React.useState(MOCK_REPORTS);
+  const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<AIReportHubEntry | undefined>(undefined);
   const stats = MOCK_REPORT_HUB_STATS;
 
   const handleDeleteReport = (id: string) => {
     setReports(reports.filter(r => r.id !== id));
+  };
+
+  const handleOpenExport = (report?: AIReportHubEntry) => {
+    setSelectedReport(report);
+    setIsExportModalOpen(true);
   };
 
   return (
@@ -32,7 +41,11 @@ export default function ReportsPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="h-12 px-6 gap-2 border-border-strong font-bold text-xs uppercase tracking-widest">
+            <Button 
+              variant="secondary" 
+              className="h-12 px-6 gap-2 border-border-strong font-bold text-xs uppercase tracking-widest"
+              onClick={() => handleOpenExport()}
+            >
               <Download size={18} className="text-text-disabled" />
               <span>Bulk Export</span>
             </Button>
@@ -73,7 +86,11 @@ export default function ReportsPage() {
 
         {/* Reports Hub */}
         <div className="space-y-4">
-          <ReportTable reports={reports} onDelete={handleDeleteReport} />
+          <ReportTable 
+            reports={reports} 
+            onDelete={handleDeleteReport} 
+            onExport={handleOpenExport}
+          />
           
           <div className="p-6 bg-hover/10 border border-border/50 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1 flex-1">
@@ -89,6 +106,13 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        reportTitle={selectedReport?.title}
+        walletAddress={selectedReport?.walletAddress}
+      />
     </AppShell>
   );
 }
