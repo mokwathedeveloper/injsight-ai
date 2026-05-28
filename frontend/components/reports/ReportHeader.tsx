@@ -12,9 +12,10 @@ interface ReportHeaderProps {
   walletAddress: string;
   walletLabel?: string;
   date: string;
+  onExport?: () => void;
 }
 
-export function ReportHeader({ title, walletAddress, walletLabel, date }: ReportHeaderProps) {
+export function ReportHeader({ title, walletAddress, walletLabel, date, onExport }: ReportHeaderProps) {
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -68,9 +69,12 @@ export function ReportHeader({ title, walletAddress, walletLabel, date }: Report
             <Printer size={14} className="text-text-disabled group-hover:text-primary transition-colors" />
             <span>Print</span>
           </Button>
-          <Button className="h-11 px-6 gap-2 font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20">
+          <Button 
+            className="h-11 px-6 gap-2 font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20"
+            onClick={onExport}
+          >
             <Download size={14} />
-            <span>Export PDF</span>
+            <span>Export Report</span>
           </Button>
         </div>
       </div>
