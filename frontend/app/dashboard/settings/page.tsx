@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { SettingsSection } from "@/components/dashboard/SettingsSection";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
@@ -70,6 +71,21 @@ export default function SettingsPage() {
           >
             <DisplayPreferences />
           </SettingsSection>
+
+          {/* Data & Privacy */}
+          <Link
+            href="/dashboard/settings/privacy"
+            className="flex items-center justify-between p-5 rounded-2xl border border-border bg-card hover:border-border-strong transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <Shield size={18} className="text-primary" />
+              <div>
+                <p className="text-sm font-bold text-text-primary">Data &amp; Privacy controls</p>
+                <p className="text-xs text-text-secondary">Export or permanently delete your saved data and account.</p>
+              </div>
+            </div>
+            <span className="text-text-disabled group-hover:text-primary transition-colors">→</span>
+          </Link>
 
           {/* Danger Zone */}
           <div className="pt-12 border-t border-error/20">
