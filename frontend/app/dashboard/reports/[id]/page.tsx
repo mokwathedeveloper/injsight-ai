@@ -7,12 +7,14 @@ import { AIReportCard } from "@/components/analyzer/AIReportCard";
 import { RiskScoreCard } from "@/components/analyzer/RiskScoreCard";
 import { PortfolioCompositionCard } from "@/components/dashboard/PortfolioCompositionCard";
 import { ExportModal } from "@/components/reports/ExportModal";
+import { ShareReportModal } from "@/components/reports/ShareReportModal";
 import { MOCK_REPORTS } from "@/data/reports-mock";
 import { DEMO_WALLETS } from "@/data/demo-wallets";
 import { WalletAnalysisResult } from "@/types/wallet-analyzer";
 
 export default function ReportDetailPage({ params }: { params: { id: string } }) {
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   
   // In a real app, fetch report by id. For now, use mock whale data.
   const reportHubData = MOCK_REPORTS[0];
@@ -29,6 +31,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
           walletLabel={reportHubData.walletLabel}
           date={reportHubData.dateGenerated}
           onExport={() => setIsExportModalOpen(true)}
+          onShare={() => setIsShareModalOpen(true)}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -72,6 +75,13 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
         onClose={() => setIsExportModalOpen(false)} 
         reportTitle={reportHubData.title}
         walletAddress={reportHubData.walletAddress}
+      />
+
+      <ShareReportModal 
+        isOpen={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)} 
+        reportId={reportHubData.id}
+        reportTitle={reportHubData.title}
       />
     </AppShell>
   );

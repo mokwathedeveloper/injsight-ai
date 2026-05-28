@@ -20,11 +20,12 @@ import Link from "next/link";
 interface AnalysisHistoryRowProps {
   entry: AnalysisHistoryEntry;
   onDelete?: (id: string) => void;
+  onShare?: (entry: AnalysisHistoryEntry) => void;
   isSelected?: boolean;
   onSelect?: (id: string) => void;
 }
 
-export function AnalysisHistoryRow({ entry, onDelete, isSelected, onSelect }: AnalysisHistoryRowProps) {
+export function AnalysisHistoryRow({ entry, onDelete, onShare, isSelected, onSelect }: AnalysisHistoryRowProps) {
   const [showMenu, setShowMenu] = React.useState(false);
   const date = new Date(entry.timestamp);
 
@@ -121,7 +122,13 @@ export function AnalysisHistoryRow({ entry, onDelete, isSelected, onSelect }: An
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
               <div className="absolute right-0 mt-2 w-48 bg-[#161B22] border border-border-strong rounded-xl shadow-2xl z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-xs text-text-secondary hover:text-text-primary hover:bg-hover transition-colors">
+                <button 
+                  onClick={() => {
+                    onShare?.(entry);
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-xs text-text-secondary hover:text-text-primary hover:bg-hover transition-colors"
+                >
                   <Share2 size={14} />
                   <span>Share Report</span>
                 </button>
