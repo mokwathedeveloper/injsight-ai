@@ -1,0 +1,48 @@
+import { RiskChange } from "../types/risk-change";
+
+export const MOCK_RISK_CHANGES: RiskChange[] = [
+  {
+    id: "rc-1",
+    walletId: "w-1",
+    previousScore: 20,
+    currentScore: 24,
+    delta: 4,
+    timestamp: "2026-05-27T10:30:00Z",
+    reason: "New exposure to volatile ecosystem assets (NINJA).",
+    riskLevel: "Low",
+    severity: "low",
+  },
+  {
+    id: "rc-2",
+    walletId: "w-2",
+    previousScore: 65,
+    currentScore: 88,
+    delta: 23,
+    timestamp: "2026-05-26T14:45:00Z",
+    reason: "Liquidity depth for top holding dropped significantly.",
+    riskLevel: "Very High",
+    severity: "critical",
+  },
+  {
+    id: "rc-3",
+    walletId: "w-3",
+    previousScore: 15,
+    currentScore: 12,
+    delta: -3,
+    timestamp: "2026-05-25T09:15:00Z",
+    reason: "Staking position increased; volatility exposure reduced.",
+    riskLevel: "Low",
+    severity: "low",
+  },
+  {
+    id: "rc-4",
+    walletId: "w-1",
+    previousScore: 24,
+    currentScore: 42,
+    delta: 18,
+    timestamp: "2026-05-24T18:20:00Z",
+    reason: "Smart contract approval detected for unverified protocol.",
+    riskLevel: "Moderate",
+    severity: "medium",
+  },
+];
