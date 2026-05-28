@@ -6,8 +6,10 @@ import { SettingsSection } from "@/components/dashboard/SettingsSection";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 import { PasswordForm } from "@/components/dashboard/PasswordForm";
 import { NotificationToggles, DisplayPreferences } from "@/components/dashboard/NotificationToggles";
+import { PlanLimitCard } from "@/components/dashboard/PlanLimitCard";
+import { LimitUpgradePrompt } from "@/components/dashboard/LimitUpgradePrompt";
 import { DangerZone } from "@/components/dashboard/DangerZone";
-import { Settings, User, Shield, Bell, Layout, AlertCircle } from "lucide-react";
+import { Settings, User, Shield, Bell, Layout, AlertCircle, CreditCard } from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -34,6 +36,16 @@ export default function SettingsPage() {
           >
             <ProfileForm />
           </SettingsSection>
+
+          {/* Billing & Limits Section */}
+          <div className="space-y-6 pt-4">
+             <div className="flex items-center gap-2 text-text-primary px-1">
+                <CreditCard size={18} className="text-primary" />
+                <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Billing & Plan Limits</h3>
+             </div>
+             <PlanLimitCard />
+             <LimitUpgradePrompt />
+          </div>
 
           {/* Security Section */}
           <SettingsSection 

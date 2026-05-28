@@ -16,7 +16,8 @@ import {
   Search,
   Zap,
   FileText,
-  Monitor
+  Monitor,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -72,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-1.5">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-2">
           {navigation.map((item) => (
             <NavItem 
               key={item.href}
@@ -82,7 +83,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-border/50">
+        {/* Plan Usage Widget */}
+        <div className="mt-8 p-4 bg-primary/5 border border-primary/10 rounded-2xl space-y-3 group/usage">
+           <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-text-disabled uppercase tracking-widest group-hover/usage:text-primary transition-colors">Usage</span>
+              <span className="text-[9px] font-bold text-primary px-1.5 py-0.5 bg-primary/10 rounded">FREE</span>
+           </div>
+           <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[10px]">
+                 <span className="text-text-secondary">Wallets</span>
+                 <span className="font-bold">4 / 5</span>
+              </div>
+              <div className="w-full h-1 bg-hover rounded-full overflow-hidden">
+                 <div className="h-full bg-primary w-[80%]" />
+              </div>
+           </div>
+           <Link href="/pricing" className="block pt-1">
+              <button className="w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 group/up">
+                 <TrendingUp size={10} />
+                 <span>Upgrade now</span>
+              </button>
+           </Link>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-border/50">
           <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-text-disabled hover:text-error hover:bg-error/10 transition-all group">
             <LogOut size={20} className="group-hover:scale-110 transition-transform" />
             <span className="text-sm font-bold tracking-tight">Sign Out</span>
