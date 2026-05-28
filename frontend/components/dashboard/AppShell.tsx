@@ -15,10 +15,14 @@ import {
   X,
   Search,
   Zap,
-  FileText, 
+  FileText,
   Monitor,
   TrendingUp,
-  CreditCard
+  CreditCard,
+  Landmark,
+  Users,
+  Code2,
+  Webhook
   } from "lucide-react";import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 
@@ -56,8 +60,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
     { href: "/dashboard/wallets", icon: Wallet, label: "My Wallets" },
     { href: "/dashboard/watchlist", icon: Monitor, label: "Watchlist" },
+    { href: "/dashboard/treasury", icon: Landmark, label: "Treasury" },
+    { href: "/dashboard/team", icon: Users, label: "Team" },
     { href: "/dashboard/reports", icon: FileText, label: "Intelligence Reports" },
     { href: "/dashboard/history", icon: History, label: "Analysis History" },
+    { href: "/dashboard/api", icon: Code2, label: "API Access" },
+    { href: "/dashboard/webhooks", icon: Webhook, label: "Webhooks" },
     { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
     { href: "/dashboard/alerts", icon: Bell, label: "Alerts" },
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },
