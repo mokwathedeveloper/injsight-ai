@@ -4,9 +4,11 @@ import * as React from "react";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { AlertList } from "@/components/dashboard/AlertList";
 import { AlertFilterBar } from "@/components/dashboard/AlertFilterBar";
+import { RiskChangeAlertCard } from "@/components/risk/RiskChangeAlertCard";
 import { MOCK_ALERTS_LOG } from "@/data/alerts-mock";
+import { MOCK_RISK_CHANGES } from "@/data/risk-change-mock";
 import { AlertFilters, DashboardAlertEntry } from "@/types/alerts";
-import { Bell, Shield, Settings, Info } from "lucide-react";
+import { Bell, Shield, Settings, Info, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function AlertsPage() {
@@ -43,6 +45,8 @@ export default function AlertsPage() {
     setAlerts(alerts.map(a => ({ ...a, isRead: true })));
   };
 
+  const latestRiskChanges = MOCK_RISK_CHANGES.slice(0, 2);
+
   return (
     <AppShell>
       <div className="space-y-8 animate-in fade-in duration-700">
@@ -67,6 +71,21 @@ export default function AlertsPage() {
             </Button>
           </div>
         </div>
+
+        {/* Priority Section: Risk Drift */}
+        {filters.type === "all" || filters.type === "risk" ? (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 px-1">
+               <Zap size={16} className="text-primary fill-primary" />
+               <h3 className="text-xs font-bold text-text-disabled uppercase tracking-[0.2em]">Priority Risk Drift</h3>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+               {latestRiskChanges.map(change => (
+                 <RiskChangeAlertCard key={change.id} change={change} />
+               ))}
+            </div>
+          </div>
+        ) : null}
 
         {/* Toolbar */}
         <AlertFilterBar 
