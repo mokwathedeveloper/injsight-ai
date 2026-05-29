@@ -54,3 +54,15 @@ test-results/
 # ── Misc ───────────────────────────────────────────────
 *.tgz
 .envrc
+
+# ── Project-specific ignores ───────────────────────────
+# Old frontend directory (superseded by app/)
+frontend/
+# Backup snapshots created before restructure
+_backup_before_restructure/
+# Screenshot artefacts from visual checks
+*.png
+!design/
+!design/**
+# Injective SQLite leftover
+injsight.db
