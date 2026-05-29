@@ -60,3 +60,42 @@ export const reportsApi = {
 export const usersApi = {
   usage: () => apiRequest<ApiUsage>("/api/users/usage", { auth: true }),
 };
+
+export const billingApi = {
+  summary: () => apiRequest<any>("/api/billing/summary", { auth: true }),
+};
+
+export const teamsApi = {
+  workspaces: () => apiRequest<any[]>("/api/teams/workspaces", { auth: true }),
+  members: () => apiRequest<any[]>("/api/teams/members", { auth: true }),
+  invite: (email: string, role: string) =>
+    apiRequest<any>("/api/teams/members", { method: "POST", body: { email, role }, auth: true }),
+  updateRole: (id: string, role: string) =>
+    apiRequest<any>(`/api/teams/members/${id}/role`, { method: "PUT", body: { role }, auth: true }),
+  remove: (id: string) =>
+    apiRequest<null>(`/api/teams/members/${id}`, { method: "DELETE", auth: true }),
+};
+
+export const treasuryApi = {
+  summary: () => apiRequest<any>("/api/treasury/summary", { auth: true }),
+};
+
+export const adminApi = {
+  stats: () => apiRequest<any>("/api/admin/stats", { auth: true }),
+  users: () => apiRequest<any[]>("/api/admin/users", { auth: true }),
+};
+
+export const developerApi = {
+  listKeys: () => apiRequest<any[]>("/api/developer/keys", { auth: true }),
+  createKey: (name: string) =>
+    apiRequest<any>("/api/developer/keys", { method: "POST", body: { name }, auth: true }),
+  revokeKey: (id: string) =>
+    apiRequest<null>(`/api/developer/keys/${id}`, { method: "DELETE", auth: true }),
+  keyUsage: () => apiRequest<any>("/api/developer/keys/usage", { auth: true }),
+  listWebhooks: () => apiRequest<any[]>("/api/developer/webhooks", { auth: true }),
+  createWebhook: (url: string, events: string[]) =>
+    apiRequest<any>("/api/developer/webhooks", { method: "POST", body: { url, events }, auth: true }),
+  deleteWebhook: (id: string) =>
+    apiRequest<null>(`/api/developer/webhooks/${id}`, { method: "DELETE", auth: true }),
+  deliveries: () => apiRequest<any[]>("/api/developer/webhooks/deliveries", { auth: true }),
+};
