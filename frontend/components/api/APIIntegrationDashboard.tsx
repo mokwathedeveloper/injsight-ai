@@ -17,6 +17,8 @@ import {
   MOCK_RATE_LIMIT,
   MOCK_RESPONSE_PREVIEW,
 } from "@/data/api-platform-mock";
+import { developerApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
 import { Plus, Activity, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,22 +31,41 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export function APIIntegrationDashboard() {
+  const authed = useAuthStore((s) => !!s.accessToken);
   const [tab, setTab] = React.useState<Tab>("keys");
   const [keys, setKeys] = React.useState<ApiKey[]>(MOCK_API_KEYS);
+  const [log, setLog] = React.useState(MOCK_REQUEST_LOG);
+  const [rateLimit, setRateLimit] = React.useState(MOCK_RATE_LIMIT);
   const [isCreateOpen, setCreateOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!authed) return;
+    developerApi.listKeys().then((ks: any[]) => setKeys(ks)).catch(() => {});
+    developerApi.keyUsage().then((u: any) => {
+      if (u?.log) setLog(u.log);
+      if (u?.limit) setRateLimit({ limit: u.limit, used: u.used, window: u.window, resetsIn: u.resetsIn });
+    }).catch(() => {});
+  }, [authed]);
 
   const activeKeys = keys.filter((k) => k.status === "active").length;
   const successRate = Math.round(
-    (MOCK_REQUEST_LOG.filter((r) => r.statusClass === "success").length / MOCK_REQUEST_LOG.length) * 100
+    (log.filter((r: any) => r.statusClass === "success").length / Math.max(log.length, 1)) * 100
   );
 
-  const handleCreate = (name: string) =>
-    setKeys((prev) => [
-      { id: `k-${Date.now()}`, name, prefix: "injsk_live_•••••", created: "Just now", lastUsed: "Never", status: "active" },
-      ...prev,
-    ]);
-  const handleRevoke = (id: string) =>
+  const handleCreate = (name: string) => {
+    if (authed) {
+      developerApi.createKey(name).then((k: any) => setKeys((prev) => [k, ...prev])).catch(() => {});
+    } else {
+      setKeys((prev) => [
+        { id: `k-${Date.now()}`, name, prefix: "injsk_live_•••••", created: "Just now", lastUsed: "Never", status: "active" },
+        ...prev,
+      ]);
+    }
+  };
+  const handleRevoke = (id: string) => {
     setKeys((prev) => prev.map((k) => (k.id === id ? { ...k, status: "revoked" } : k)));
+    if (authed) developerApi.revokeKey(id).catch(() => {});
+  };
 
   return (
     <div className="space-y-8">
@@ -95,9 +116,9 @@ export function APIIntegrationDashboard() {
       {tab === "logs" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
           <div className="lg:col-span-2">
-            <RequestLog entries={MOCK_REQUEST_LOG} />
+            <RequestLog entries={log} />
           </div>
-          <RateLimitCard rateLimit={MOCK_RATE_LIMIT} />
+          <RateLimitCard rateLimit={rateLimit} />
         </div>
       )}
 

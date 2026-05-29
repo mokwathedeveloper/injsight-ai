@@ -8,16 +8,36 @@ import { DeliveryLog } from "@/components/webhooks/DeliveryLog";
 import { MOCK_WEBHOOKS, MOCK_WEBHOOK_DELIVERIES } from "@/data/webhooks-mock";
 import { Webhook, WebhookEvent } from "@/types/webhooks";
 import { Webhook as WebhookIcon } from "lucide-react";
+import { developerApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
 
 export default function WebhooksPage() {
+  const authed = useAuthStore((s) => !!s.accessToken);
   const [webhooks, setWebhooks] = React.useState<Webhook[]>(MOCK_WEBHOOKS);
+  const [deliveries, setDeliveries] = React.useState(MOCK_WEBHOOK_DELIVERIES);
 
-  const handleAdd = (url: string, events: WebhookEvent[]) =>
-    setWebhooks((prev) => [
-      { id: `wh-${Date.now()}`, url, events, status: "active", createdAt: "Just now" },
-      ...prev,
-    ]);
-  const handleDelete = (id: string) => setWebhooks((prev) => prev.filter((w) => w.id !== id));
+  React.useEffect(() => {
+    if (!authed) return;
+    developerApi.listWebhooks().then((wh: any[]) => { if (wh.length >= 0) setWebhooks(wh); }).catch(() => {});
+    developerApi.deliveries().then((d: any[]) => { if (d?.length) setDeliveries(d); }).catch(() => {});
+  }, [authed]);
+
+  const handleAdd = (url: string, events: WebhookEvent[]) => {
+    if (authed) {
+      developerApi.createWebhook(url, events)
+        .then((wh: any) => setWebhooks((prev) => [wh, ...prev]))
+        .catch(() => {});
+    } else {
+      setWebhooks((prev) => [
+        { id: `wh-${Date.now()}`, url, events, status: "active", createdAt: "Just now" },
+        ...prev,
+      ]);
+    }
+  };
+  const handleDelete = (id: string) => {
+    setWebhooks((prev) => prev.filter((w) => w.id !== id));
+    if (authed) developerApi.deleteWebhook(id).catch(() => {});
+  };
 
   return (
     <AppShell>
@@ -35,7 +55,7 @@ export default function WebhooksPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <WebhookTable webhooks={webhooks} onDelete={handleDelete} />
-            <DeliveryLog deliveries={MOCK_WEBHOOK_DELIVERIES} />
+            <DeliveryLog deliveries={deliveries} />
           </div>
           <div className="lg:col-span-1">
             <WebhookForm onAdd={handleAdd} />
