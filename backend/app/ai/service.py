@@ -198,25 +198,46 @@ def _rule_based_report(normalized: dict, risk: dict) -> dict:
 def generate_report(normalized: dict, risk: dict) -> dict:
     """Generate an AI report for the wallet.
 
-    Tries Claude claude-haiku-4-5-20251001 first; falls back to rule-based analysis if the
-    API key is absent or the call fails.
+    Priority order:
+    1. OpenRouter AI (primary — fastest, most capable)
+    2. Anthropic Claude (secondary fallback)
+    3. Rule-based deterministic (always works)
     """
-    claude_result = _call_claude(normalized, risk)
+    # 1. Try OpenRouter first (production primary)
+    try:
+        from app.ai.openrouter_service import generate_wallet_report
+        openrouter_result = generate_wallet_report(normalized, risk)
+        if openrouter_result and openrouter_result.get("summary"):
+            full = openrouter_result
+            model_used = "openrouter/" + os.getenv("OPENROUTER_AI_MODEL", "llama-3.3-70b-instruct")
+            return {
+                "summary":              full.get("summary", ""),
+                "concentration_analysis": full.get("concentrationAnalysis", ""),
+                "risk_explanation":     full.get("riskExplanation", ""),
+                "injective_context":    full.get("injectiveContext", ""),
+                "suggested_next_steps": full.get("suggestedNextSteps", []),
+                "full_report":          full,
+                "model_name":           model_used,
+            }
+    except Exception as exc:
+        logger.warning("OpenRouter report generation failed: %s", exc)
 
+    # 2. Try Anthropic Claude
+    claude_result = _call_claude(normalized, risk)
     if claude_result is not None:
-        # Claude succeeded — normalise the keys into the DB schema
         full = claude_result
         model_used = MODEL_NAME
     else:
+        # 3. Rule-based fallback — always works
         full = _rule_based_report(normalized, risk)
         model_used = FALLBACK_MODEL_NAME
 
     return {
-        "summary": full.get("summary", ""),
+        "summary":              full.get("summary", ""),
         "concentration_analysis": full.get("concentrationAnalysis", ""),
-        "risk_explanation": full.get("riskExplanation", ""),
-        "injective_context": full.get("injectiveContext", ""),
+        "risk_explanation":     full.get("riskExplanation", ""),
+        "injective_context":    full.get("injectiveContext", ""),
         "suggested_next_steps": full.get("suggestedNextSteps", []),
-        "full_report": full,
-        "model_name": model_used,
+        "full_report":          full,
+        "model_name":           model_used,
     }
