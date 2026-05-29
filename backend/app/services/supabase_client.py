@@ -28,20 +28,37 @@ except ImportError:
 
 @lru_cache(maxsize=1)
 def get_supabase() -> "Client | None":
-    """Return cached Supabase client. Returns None if not configured."""
+    """Return cached Supabase client.
+
+    Uses service_role key when available (full access, bypasses RLS).
+    Falls back to anon key (limited by RLS — read-only for public data).
+    Returns None if Supabase is not configured.
+    """
     if not _SUPABASE_AVAILABLE:
         return None
 
-    url  = os.getenv("SUPABASE_URL", "")
-    key  = os.getenv("SUPABASE_ANON_KEY", "")
+    from app.config import settings
+
+    url = settings.supabase_url or os.getenv("SUPABASE_URL", "")
+    # Prefer service_role (bypasses RLS) → fall back to anon
+    key = (
+        settings.supabase_service_key
+        or os.getenv("SUPABASE_SERVICE_KEY", "")
+        or settings.supabase_anon_key
+        or os.getenv("SUPABASE_ANON_KEY", "")
+    )
 
     if not url or not key:
-        logger.info("SUPABASE_URL or SUPABASE_ANON_KEY not set — Supabase client disabled")
+        logger.info("Supabase not configured — client disabled")
         return None
+
+    key_type = "service_role" if (
+        settings.supabase_service_key or os.getenv("SUPABASE_SERVICE_KEY", "")
+    ) else "anon"
 
     try:
         client = create_client(url, key)
-        logger.info("Supabase client initialised for %s", url)
+        logger.info("Supabase client ready (%s key) for %s", key_type, url)
         return client
     except Exception as exc:
         logger.error("Failed to create Supabase client: %s", exc)

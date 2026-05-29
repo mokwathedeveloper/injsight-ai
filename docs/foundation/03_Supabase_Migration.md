@@ -2,11 +2,32 @@
 
 ## Overview
 
-This document contains the complete SQL migration for InjSight AI's Supabase database.  
-Run this once in the Supabase SQL Editor to create all tables, indexes, triggers, and RLS policies.
+This document contains the complete SQL migration for InjSight AI's Supabase database.
 
 **Supabase Project:** `xufsfvdzxbwnudwrojor`  
 **Project URL:** `https://xufsfvdzxbwnudwrojor.supabase.co`
+
+---
+
+## Where to Find Your Keys (before you start)
+
+Go to: **Supabase Dashboard → Settings → API**
+
+You will see all three on the same page:
+
+| What | Where on the page | Used for |
+|---|---|---|
+| **Project URL** | Top of the page | Both frontend and backend |
+| **anon key** | Under "Project API keys" | Frontend only (browser) |
+| **service_role key** | Under "Project API keys" → click **Reveal** | Backend only (server) |
+
+> You do NOT need the database connection string.  
+> Project URL + service_role key is enough to connect the backend.
+
+Once you have the service_role key, paste it into `backend/.env`:
+```
+SUPABASE_SERVICE_KEY=eyJhbGci...   ← paste here
+```
 
 ---
 
