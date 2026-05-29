@@ -6,10 +6,15 @@ from app import models  # noqa: F401  (ensures models are registered on Base)
 from app.alerts.router import router as alerts_router
 from app.analysis.router import public_router, router as analysis_router
 from app.auth.router import router as auth_router
+from app.admin.router import router as admin_router
+from app.billing.router import router as billing_router
 from app.common.responses import APIError, api_error_handler, ok
 from app.config import settings
 from app.db import Base, engine
+from app.developer.router import api_keys_router, webhooks_router
 from app.reports.router import router as reports_router
+from app.teams.router import router as teams_router
+from app.treasury.router import router as treasury_router
 from app.users.router import router as users_router
 from app.wallets.router import router as wallets_router
 
@@ -44,6 +49,12 @@ def create_app() -> FastAPI:
     app.include_router(wallets_router)
     app.include_router(reports_router)
     app.include_router(alerts_router)
+    app.include_router(billing_router)
+    app.include_router(teams_router)
+    app.include_router(treasury_router)
+    app.include_router(api_keys_router)
+    app.include_router(webhooks_router)
+    app.include_router(admin_router)
 
     return app
 
