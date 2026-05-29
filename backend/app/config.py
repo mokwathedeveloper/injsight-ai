@@ -25,14 +25,32 @@ class Settings(BaseSettings):
 
     service_name: str = "injsight-ai-api"
 
-    # Anthropic / AI
-    anthropic_api_key: str = ""
+    # ── AI providers ──────────────────────────────────────────────────────────
+    anthropic_api_key: str   = ""
+    openrouter_api_key: str  = ""          # Primary AI — OpenRouter
+    # OpenRouter model overrides
+    openrouter_analysis_model: str = "meta-llama/llama-3.3-70b-instruct"
+    openrouter_chat_model: str     = "meta-llama/llama-3.3-70b-instruct"
 
-    # Injective LCD REST API
+    # ── Supabase ───────────────────────────────────────────────────────────────
+    supabase_url: str         = ""
+    supabase_anon_key: str    = ""
+    supabase_service_key: str = ""         # Needed for admin operations
+
+    # ── Injective LCD REST API ─────────────────────────────────────────────────
     injective_lcd_url: str = "https://lcd.injective.network"
 
-    # CoinGecko price API
+    # ── CoinGecko ──────────────────────────────────────────────────────────────
     coingecko_api_url: str = "https://api.coingecko.com/api/v3"
+
+    @property
+    def ai_provider(self) -> str:
+        """Return which AI provider is active."""
+        if self.openrouter_api_key:
+            return "openrouter"
+        if self.anthropic_api_key:
+            return "anthropic"
+        return "rule-based"
 
     @property
     def cors_origin_list(self) -> list[str]:
