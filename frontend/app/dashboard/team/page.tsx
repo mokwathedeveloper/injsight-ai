@@ -10,17 +10,45 @@ import { InviteMemberModal } from "@/components/team/InviteMemberModal";
 import { MOCK_WORKSPACES, MOCK_TEAM_MEMBERS, MOCK_SHARED_WALLETS } from "@/data/team-mock";
 import { Button } from "@/components/ui/Button";
 import { UserPlus, Users } from "lucide-react";
+import { teamsApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
+import { useWallets } from "@/hooks/useDashboardData";
+import { adaptWatchlistWallet } from "@/lib/api/adapters";
 
 export default function TeamPage() {
+  const authed = useAuthStore((s) => !!s.accessToken);
   const [activeWs, setActiveWs] = React.useState(MOCK_WORKSPACES[0].id);
+  const [workspaces, setWorkspaces] = React.useState(MOCK_WORKSPACES);
   const [isInviteOpen, setInviteOpen] = React.useState(false);
   const [members, setMembers] = React.useState(MOCK_TEAM_MEMBERS);
 
+  // Use live saved wallets as the "shared wallets" source
+  const { data: liveWallets } = useWallets();
+  const sharedWallets = React.useMemo(
+    () => liveWallets ? liveWallets.map(adaptWatchlistWallet).map((w) => ({
+      id: w.id, label: w.label, address: w.address,
+      addedBy: "You", riskScore: w.riskScore, riskLevel: w.riskLevel as any, valueUsd: w.totalValueUsd,
+    })) : MOCK_SHARED_WALLETS,
+    [liveWallets]
+  );
+
+  React.useEffect(() => {
+    if (!authed) return;
+    teamsApi.workspaces().then((ws: any[]) => setWorkspaces(ws)).catch(() => {});
+    teamsApi.members().then((ms: any[]) => setMembers(ms)).catch(() => {});
+  }, [authed]);
+
   const handleInvite = (email: string, role: any) => {
-    setMembers((prev) => [
-      ...prev,
-      { id: `m-${Date.now()}`, name: email, email, role, status: "invited", initials: "?", lastActive: "Invite sent" },
-    ]);
+    if (authed) {
+      teamsApi.invite(email, role)
+        .then((m: any) => setMembers((prev) => [...prev, m]))
+        .catch(() => {});
+    } else {
+      setMembers((prev) => [
+        ...prev,
+        { id: `m-${Date.now()}`, name: email, email, role, status: "invited", initials: "?", lastActive: "Invite sent" },
+      ]);
+    }
   };
 
   return (
@@ -37,16 +65,16 @@ export default function TeamPage() {
             <p className="text-text-secondary text-sm">Share wallets, reports, and alerts across your organization.</p>
           </div>
           <div className="flex items-center gap-3">
-            <WorkspaceSwitcher workspaces={MOCK_WORKSPACES} activeId={activeWs} onSwitch={setActiveWs} />
+            <WorkspaceSwitcher workspaces={workspaces} activeId={activeWs} onSwitch={setActiveWs} />
             <Button className="h-12 px-6 gap-2 font-bold text-xs uppercase tracking-widest" onClick={() => setInviteOpen(true)}>
               <UserPlus size={16} /> Invite
             </Button>
           </div>
         </div>
 
-        <TeamDashboard members={members} wallets={MOCK_SHARED_WALLETS} />
+        <TeamDashboard members={members} wallets={sharedWallets} />
 
-        <SharedWalletsTable wallets={MOCK_SHARED_WALLETS} />
+        <SharedWalletsTable wallets={sharedWallets} />
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Link href="/dashboard/team/members" className="flex-1">

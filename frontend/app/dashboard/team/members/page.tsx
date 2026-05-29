@@ -10,18 +10,39 @@ import { MOCK_TEAM_MEMBERS } from "@/data/team-mock";
 import { ROLE_PERMISSIONS, TeamRole } from "@/types/team";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, UserPlus } from "lucide-react";
+import { teamsApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
 
 const ROLES: TeamRole[] = ["owner", "admin", "analyst", "viewer"];
 
 export default function TeamMembersPage() {
+  const authed = useAuthStore((s) => !!s.accessToken);
   const [members, setMembers] = React.useState(MOCK_TEAM_MEMBERS);
   const [isInviteOpen, setInviteOpen] = React.useState(false);
 
-  const handleRoleChange = (id: string, role: TeamRole) =>
+  // Load live members on mount when authenticated
+  React.useEffect(() => {
+    if (!authed) return;
+    teamsApi.members().then((ms: any[]) => setMembers(ms)).catch(() => {});
+  }, [authed]);
+
+  const handleRoleChange = (id: string, role: TeamRole) => {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, role } : m)));
-  const handleRemove = (id: string) => setMembers((prev) => prev.filter((m) => m.id !== id));
-  const handleInvite = (email: string, role: TeamRole) =>
-    setMembers((prev) => [...prev, { id: `m-${Date.now()}`, name: email, email, role, status: "invited", initials: "?", lastActive: "Invite sent" }]);
+    if (authed) teamsApi.updateRole(id, role).catch(() => {});
+  };
+  const handleRemove = (id: string) => {
+    setMembers((prev) => prev.filter((m) => m.id !== id));
+    if (authed) teamsApi.remove(id).catch(() => {});
+  };
+  const handleInvite = (email: string, role: TeamRole) => {
+    if (authed) {
+      teamsApi.invite(email, role)
+        .then((m: any) => setMembers((prev) => [...prev, m]))
+        .catch(() => {});
+    } else {
+      setMembers((prev) => [...prev, { id: `m-${Date.now()}`, name: email, email, role, status: "invited", initials: "?", lastActive: "Invite sent" }]);
+    }
+  };
 
   return (
     <AppShell>
