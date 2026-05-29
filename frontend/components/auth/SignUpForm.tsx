@@ -8,8 +8,13 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import { SocialAuthButtons } from "./SocialAuthButtons";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api/endpoints";
+import { ApiError } from "@/lib/api/client";
+import { useAuthStore } from "@/store/auth";
 
 const signupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,6 +28,9 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
+  const setAuth = useAuthStore((s) => s.setAuth);
 
   const {
     register,
@@ -37,15 +45,28 @@ export function SignUpForm() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Form Data:", data);
-    setIsLoading(false);
-    // Redirect or show success
+    setError(null);
+    try {
+      // Form has no name field; derive a sensible default from the email.
+      const name = data.email.split("@")[0];
+      const result = await authApi.signup(name, data.email, data.password);
+      setAuth(result.user, result.tokens.accessToken, result.tokens.refreshToken);
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "NETWORK_ERROR") {
+        setError("Could not reach the InjSight AI API. Is the backend running?");
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+      {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-text-disabled uppercase tracking-widest px-1">

@@ -10,6 +10,10 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { SocialAuthButtons } from "./SocialAuthButtons";
 import { Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api/endpoints";
+import { ApiError } from "@/lib/api/client";
+import { useAuthStore } from "@/store/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,6 +27,8 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
+  const setAuth = useAuthStore((s) => s.setAuth);
 
   const {
     register,
@@ -35,19 +41,20 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setError(null);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    // For demo purposes, fail on a specific email
-    if (data.email === "fail@example.com") {
-      setError("Invalid email or password. Please try again.");
+    try {
+      const result = await authApi.login(data.email, data.password);
+      setAuth(result.user, result.tokens.accessToken, result.tokens.refreshToken);
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "NETWORK_ERROR") {
+        setError("Could not reach the InjSight AI API. Is the backend running?");
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
       setIsLoading(false);
-      return;
     }
-
-    console.log("Login Data:", data);
-    setIsLoading(false);
-    // Redirect on success
   };
 
   return (

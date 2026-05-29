@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 import { 
   LayoutDashboard, 
   Wallet, 
@@ -54,7 +55,21 @@ function NavItem({ href, icon: Icon, label, isActive, onClick }: NavItemProps) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  const user = useAuthStore((s) => s.user);
+  const clearAuth = useAuthStore((s) => s.clear);
+
+  // Fall back to demo identity when not authenticated so the UI stays polished.
+  const displayName = user?.name || user?.email?.split("@")[0] || "John Doe";
+  const displayPlan = (user?.plan || "pro").toUpperCase();
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  const handleSignOut = () => {
+    clearAuth();
+    router.push("/login");
+  };
 
   const navigation = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -116,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="mt-6 pt-6 border-t border-border/50">
-          <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-text-disabled hover:text-error hover:bg-error/10 transition-all group">
+          <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-text-disabled hover:text-error hover:bg-error/10 transition-all group">
             <LogOut size={20} className="group-hover:scale-110 transition-transform" />
             <span className="text-sm font-bold tracking-tight">Sign Out</span>
           </button>
@@ -156,11 +171,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="h-8 w-px bg-border mx-1" />
             <div className="flex items-center gap-3 pl-1 group cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                JD
+                {initials}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-xs font-bold leading-none">John Doe</p>
-                <p className="text-[10px] text-text-disabled uppercase mt-1 font-bold">Pro Plan</p>
+                <p className="text-xs font-bold leading-none">{displayName}</p>
+                <p className="text-[10px] text-text-disabled uppercase mt-1 font-bold">{displayPlan} Plan</p>
               </div>
             </div>
           </div>
@@ -199,7 +214,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </nav>
 
             <div className="mt-auto pt-6 absolute bottom-6 left-6 right-6">
-              <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-text-disabled hover:text-error hover:bg-error/10 transition-all group border-t border-border/50">
+              <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-text-disabled hover:text-error hover:bg-error/10 transition-all group border-t border-border/50">
                 <LogOut size={20} />
                 <span className="text-sm font-bold tracking-tight">Sign Out</span>
               </button>
