@@ -8,21 +8,29 @@ from sqlalchemy.orm import Session
 from app.auth.dependencies import current_user
 from app.common.responses import APIError, ok
 from app.db import get_db
-from app.models import AIReport, User
+from app.models import AIReport, RiskScore, User
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
 
-def serialize_report(r: AIReport) -> dict:
+def serialize_report(r: AIReport, db: Session | None = None) -> dict:
+    risk = (
+        db.query(RiskScore).filter(RiskScore.analysis_run_id == str(r.analysis_run_id)).first()
+        if db is not None
+        else None
+    )
     return {
         "id": str(r.id),
         "analysisRunId": str(r.analysis_run_id),
         "walletAddress": r.wallet_address,
+        "title": f"AI Report — {r.wallet_address[:10]}…{r.wallet_address[-4:]}",
         "summary": r.summary,
         "concentrationAnalysis": r.concentration_analysis,
         "riskExplanation": r.risk_explanation,
         "injectiveContext": r.injective_context,
         "suggestedNextSteps": r.suggested_next_steps or [],
+        "riskScore": risk.score if risk else None,
+        "riskLevel": risk.risk_level if risk else None,
         "modelName": r.model_name,
         "createdAt": r.created_at,
     }
@@ -38,12 +46,12 @@ def _owned(db: Session, report_id: str, user: User) -> AIReport:
 @router.get("")
 def list_reports(db: Session = Depends(get_db), user: User = Depends(current_user)):
     reports = db.query(AIReport).filter(AIReport.user_id == str(user.id)).order_by(AIReport.created_at.desc()).all()
-    return ok([serialize_report(r) for r in reports])
+    return ok([serialize_report(r, db) for r in reports])
 
 
 @router.get("/{report_id}")
 def get_report(report_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return ok(serialize_report(_owned(db, report_id, user)))
+    return ok(serialize_report(_owned(db, report_id, user), db))
 
 
 @router.post("/{report_id}/export")

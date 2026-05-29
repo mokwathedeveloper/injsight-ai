@@ -9,7 +9,7 @@ from app.analysis.service import run_analysis, serialize_analysis
 from app.auth.dependencies import current_user
 from app.common.responses import APIError, ok
 from app.db import get_db
-from app.models import User, Wallet
+from app.models import RiskScore, User, Wallet, WalletAnalysisRun
 
 router = APIRouter(prefix="/api/wallets", tags=["wallets"])
 
@@ -24,8 +24,27 @@ class UpdateWalletRequest(BaseModel):
     label: str = Field(max_length=120)
 
 
-def serialize_wallet(w: Wallet) -> dict:
+def _latest_summary(db: Session, wallet: Wallet) -> dict:
+    """Pull risk score + portfolio value from the wallet's most recent run."""
+    run = (
+        db.query(WalletAnalysisRun)
+        .filter(WalletAnalysisRun.wallet_id == str(wallet.id), WalletAnalysisRun.status == "completed")
+        .order_by(WalletAnalysisRun.created_at.desc())
+        .first()
+    )
+    if run is None:
+        return {"riskScore": None, "riskLevel": None, "totalValueUsd": None}
+    risk = db.query(RiskScore).filter(RiskScore.analysis_run_id == str(run.id)).first()
+    normalized = run.normalized_data or {}
     return {
+        "riskScore": risk.score if risk else None,
+        "riskLevel": risk.risk_level if risk else None,
+        "totalValueUsd": normalized.get("total_value_usd"),
+    }
+
+
+def serialize_wallet(w: Wallet, db: Session | None = None) -> dict:
+    base = {
         "id": str(w.id),
         "address": w.address,
         "chain": w.chain,
@@ -33,13 +52,19 @@ def serialize_wallet(w: Wallet) -> dict:
         "isDemo": w.is_demo,
         "lastAnalyzedAt": w.last_analyzed_at,
         "createdAt": w.created_at,
+        "riskScore": None,
+        "riskLevel": None,
+        "totalValueUsd": None,
     }
+    if db is not None:
+        base.update(_latest_summary(db, w))
+    return base
 
 
 @router.get("")
 def list_wallets(db: Session = Depends(get_db), user: User = Depends(current_user)):
     wallets = db.query(Wallet).filter(Wallet.user_id == str(user.id)).order_by(Wallet.created_at.desc()).all()
-    return ok([serialize_wallet(w) for w in wallets])
+    return ok([serialize_wallet(w, db) for w in wallets])
 
 
 @router.post("")
@@ -60,7 +85,7 @@ def _owned(db: Session, wallet_id: str, user: User) -> Wallet:
 
 @router.get("/{wallet_id}")
 def get_wallet(wallet_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return ok(serialize_wallet(_owned(db, wallet_id, user)))
+    return ok(serialize_wallet(_owned(db, wallet_id, user), db))
 
 
 @router.put("/{wallet_id}")
