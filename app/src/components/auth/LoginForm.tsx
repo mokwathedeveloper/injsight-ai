@@ -5,28 +5,38 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 export function LoginForm() {
-  const router   = useRouter();
-  const [email,  setEmail]   = useState("");
-  const [pw,     setPw]      = useState("");
-  const [showPw, setShowPw]  = useState(false);
+  const router    = useRouter();
+  const { login } = useAuthStore();
+
+  const [email,    setEmail]    = useState("");
+  const [pw,       setPw]       = useState("");
+  const [showPw,   setShowPw]   = useState(false);
   const [remember, setRemember] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error,  setError]   = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    await new Promise(r => setTimeout(r, 900));
-    // Simulate wrong-password error for demo
-    if (pw === "wrong") {
-      setError("The email or password you entered is incorrect. Please try again.");
+
+    try {
+      await login(email.trim(), pw);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string; detail?: string } } })
+          ?.response?.data?.message ??
+        (err as { response?: { data?: { detail?: string } } })
+          ?.response?.data?.detail ??
+        "Invalid email or password. Please try again.";
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push("/dashboard");
   };
 
   return (
@@ -43,7 +53,7 @@ export function LoginForm() {
         type="email"
         placeholder="Enter your email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         required
         autoComplete="email"
       />
@@ -54,7 +64,7 @@ export function LoginForm() {
           type={showPw ? "text" : "password"}
           placeholder="Enter your password"
           value={pw}
-          onChange={e => setPw(e.target.value)}
+          onChange={(e) => setPw(e.target.value)}
           required
           autoComplete="current-password"
           rightIcon={
@@ -70,12 +80,11 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Remember me */}
       <label className="flex items-center gap-2 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={remember}
-          onChange={e => setRemember(e.target.checked)}
+          onChange={(e) => setRemember(e.target.checked)}
           className="w-4 h-4 rounded border-border bg-surface-2 text-primary focus:ring-primary/40"
         />
         <span className="text-xs text-text-secondary">Remember me</span>
@@ -93,26 +102,18 @@ export function LoginForm() {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        {[
-          { label: "Continue with Google",  color: "text-red-400"    },
-          { label: "Continue with Apple",   color: "text-text-primary" },
-        ].map(({ label, color }) => (
-          <Button key={label} type="button" variant="secondary" className="text-xs justify-start gap-2">
-            <span className={`${color} font-semibold`}>{label.split(" ")[2]}</span>
-            <span className="text-text-muted">{label.replace(`Continue with ${label.split(" ")[2]}`, "").trim() || `Continue with ${label.split(" ")[2]}`}</span>
-          </Button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          { label: "Continue with Discord", color: "text-violet-400" },
-          { label: "Continue with GitHub",  color: "text-text-secondary" },
-        ].map(({ label, color }) => (
-          <Button key={label} type="button" variant="secondary" className="text-xs">
-            <span className={color}>{label.split(" ")[2]}</span>
-          </Button>
-        ))}
+        <Button type="button" variant="secondary" className="text-xs">
+          <span className="text-red-400 font-semibold">Google</span>
+        </Button>
+        <Button type="button" variant="secondary" className="text-xs">
+          <span className="text-text-primary">Apple</span>
+        </Button>
+        <Button type="button" variant="secondary" className="text-xs">
+          <span className="text-violet-400">Discord</span>
+        </Button>
+        <Button type="button" variant="secondary" className="text-xs">
+          <span className="text-text-secondary">GitHub</span>
+        </Button>
       </div>
     </form>
   );

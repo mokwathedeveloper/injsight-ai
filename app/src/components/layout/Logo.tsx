@@ -19,7 +19,8 @@ export function Logo({ className, size = "md" }: LogoProps) {
         alt="InjSight AI logo"
         width={dim}
         height={dim}
-        className="rounded-lg"
+        style={{ width: dim, height: dim }}
+        className="rounded-lg object-contain"
         priority
       />
       <span className={cn("font-bold text-text-primary", textSizes[size])}>
