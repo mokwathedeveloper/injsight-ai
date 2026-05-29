@@ -8,13 +8,18 @@ export interface AlertAPI {
   severity?: string;
   title: string;
   message: string;
+  // Backend returns camelCase; keep snake_case aliases for compatibility
+  walletAddress?: string;
   wallet_address?: string;
+  walletLabel?: string;
   wallet_label?: string;
+  createdAt?: string;
   created_at?: string;
-  time?: string;
-  status?: string;
+  isRead?: boolean;
   read?: boolean;
   source?: string;
+  status?: string;
+  time?: string;
 }
 
 export function useAlerts() {

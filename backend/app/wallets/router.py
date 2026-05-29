@@ -85,7 +85,26 @@ def _owned(db: Session, wallet_id: str, user: User) -> Wallet:
 
 @router.get("/{wallet_id}")
 def get_wallet(wallet_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return ok(serialize_wallet(_owned(db, wallet_id, user), db))
+    """Return wallet with its latest analysis included."""
+    wallet = _owned(db, wallet_id, user)
+    data   = serialize_wallet(wallet, db)
+    # Include latest full analysis — by wallet_id OR by address (handles analyses
+    # run before the wallet was saved, or via the public analyzer)
+    run = (
+        db.query(WalletAnalysisRun)
+        .filter(
+            WalletAnalysisRun.status == "completed",
+            (
+                (WalletAnalysisRun.wallet_id == str(wallet.id)) |
+                (WalletAnalysisRun.wallet_address == wallet.address)
+            ),
+        )
+        .order_by(WalletAnalysisRun.created_at.desc())
+        .first()
+    )
+    from app.analysis.service import serialize_analysis
+    data["latestAnalysis"] = serialize_analysis(run) if run else None
+    return ok(data)
 
 
 @router.put("/{wallet_id}")
