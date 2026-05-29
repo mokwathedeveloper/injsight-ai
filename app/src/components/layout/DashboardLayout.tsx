@@ -1,11 +1,20 @@
+"use client";
+
 import { Sidebar } from "./Sidebar";
 import { DashboardHeader } from "./DashboardHeader";
+import { useAuthStore } from "@/store/authStore";
+import { useRealtimeAlerts } from "@/hooks/useRealtimeAlerts";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { user } = useAuthStore();
+
+  // Wire Supabase Realtime — invalidates alert/dashboard queries on live events
+  useRealtimeAlerts(user?.id);
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />

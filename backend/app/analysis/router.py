@@ -22,8 +22,15 @@ class AnalyzeRequest(BaseModel):
 
 
 @public_router.post("/analyze-wallet")
-def public_analyze(body: AnalyzeRequest, db: Session = Depends(get_db)):
-    run = run_analysis(db, body.walletAddress, persist=False)
+def public_analyze(
+    body: AnalyzeRequest,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_current_user),
+):
+    """Public analysis — always runs, saves only for authenticated users."""
+    persist  = user is not None
+    user_id  = str(user.id) if user else None
+    run = run_analysis(db, body.walletAddress, user_id=user_id, persist=persist, create_alert=persist)
     return ok(serialize_analysis(run), "Wallet analysis complete.")
 
 

@@ -7,11 +7,18 @@ export interface SavedWalletAPI {
   address: string;
   label?: string;
   chain?: string;
+  // Backend returns camelCase (riskScore, riskLevel, etc.)
+  riskScore?: number;
+  riskLevel?: string;
+  totalValueUsd?: number;
+  lastAnalyzedAt?: string;
+  createdAt?: string;
+  // snake_case aliases for components that use old naming
   risk_score?: number;
   risk_level?: string;
   total_value_usd?: number;
   last_analyzed_at?: string;
-  created_at?: string;
+  latestAnalysis?: unknown;
 }
 
 export function useSavedWallets() {
@@ -27,7 +34,7 @@ export function useSavedWallets() {
 export function useSaveWallet() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { address: string; label?: string }): Promise<SavedWalletAPI> => {
+    mutationFn: async (payload: { walletAddress: string; label?: string }): Promise<SavedWalletAPI> => {
       const res = await apiClient.post("/wallets", payload);
       return unwrapData(res) as SavedWalletAPI;
     },
