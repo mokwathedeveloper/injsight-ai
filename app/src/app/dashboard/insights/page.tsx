@@ -1,127 +1,92 @@
 "use client";
 
-import type { Metadata } from "next";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui";
+import { Button, EmptyState, ErrorState, CardSkeleton, Skeleton } from "@/components/ui";
 import {
-  Brain,
-  AlertTriangle,
-  TrendingUp,
-  Shield,
-  Sparkles,
-  Info,
+  Brain, AlertTriangle, TrendingUp, Shield,
+  Sparkles, Info, RefreshCw, ExternalLink, Clock,
 } from "lucide-react";
+import { useInsights, useGenerateInsights, type InsightItem } from "@/hooks/useInsights";
 
-// ── static data ────────────────────────────────────────────────────────────────
-
-const STATS = [
-  { label: "Total Insights",  value: "47",  sub: "across all wallets",        color: "text-accent"   },
-  { label: "High Priority",   value: "8",   sub: "require attention",          color: "text-danger"   },
-  { label: "This Week",       value: "12",  sub: "new insights generated",     color: "text-primary"  },
-  { label: "Avg Risk Score",  value: "58",  sub: "across saved wallets",       color: "text-warning"  },
-];
-
-type Severity = "danger" | "warning" | "success" | "accent" | "info";
-
-interface Insight {
-  id: string;
-  icon: React.ElementType;
-  iconBg: string;
-  iconColor: string;
-  title: string;
-  description: string;
-  wallet: string;
-  time: string;
-  severity: Severity;
-  severityLabel: string;
-}
-
-const INSIGHTS: Insight[] = [
-  {
-    id: "i1",
-    icon: AlertTriangle,
-    iconBg: "bg-red-500/10",
-    iconColor: "text-danger",
-    title: "High Concentration Risk",
-    description: "INJ exceeds 80% of total portfolio value. Consider rebalancing to reduce single-asset exposure and lower overall risk score.",
-    wallet: "inj1qg5...kkxh",
-    time: "2h ago",
-    severity: "danger",
-    severityLabel: "Critical",
-  },
-  {
-    id: "i2",
-    icon: AlertTriangle,
-    iconBg: "bg-yellow-500/10",
-    iconColor: "text-warning",
-    title: "Stablecoin Buffer Low",
-    description: "Only 8% stablecoin allocation detected. A minimum 20% buffer is recommended for downside protection during market volatility.",
-    wallet: "inj1hcm8...mzh",
-    time: "5h ago",
-    severity: "warning",
-    severityLabel: "Warning",
-  },
-  {
-    id: "i3",
-    icon: Shield,
-    iconBg: "bg-green-500/10",
-    iconColor: "text-success",
-    title: "Portfolio Diversified",
-    description: "Well-balanced allocation across 12 tokens. No single asset exceeds 35% of portfolio value. Risk profile is within healthy range.",
-    wallet: "inj1xyz...abc1",
-    time: "1d ago",
-    severity: "success",
-    severityLabel: "Healthy",
-  },
-  {
-    id: "i4",
-    icon: TrendingUp,
-    iconBg: "bg-yellow-500/10",
-    iconColor: "text-warning",
-    title: "DeFi Exposure High",
-    description: "45% exposure to DeFi protocols detected. Monitor liquidity risk and smart contract exposure, especially during high-volatility periods.",
-    wallet: "inj1abc...def2",
-    time: "2d ago",
-    severity: "warning",
-    severityLabel: "Warning",
-  },
-  {
-    id: "i5",
-    icon: Sparkles,
-    iconBg: "bg-cyan-500/10",
-    iconColor: "text-accent",
-    title: "New Token Detected",
-    description: "KIRA token has been added to this wallet's portfolio. This token has limited on-chain history. Risk impact is being monitored.",
-    wallet: "inj1xyz...pqr3",
-    time: "3d ago",
-    severity: "accent",
-    severityLabel: "Info",
-  },
-  {
-    id: "i6",
-    icon: Brain,
-    iconBg: "bg-green-500/10",
-    iconColor: "text-success",
-    title: "Risk Score Improved",
-    description: "Risk score dropped from 78 to 65 following portfolio rebalancing. INJ concentration reduced from 82% to 58%, improving overall health.",
-    wallet: "inj1def...ghi3",
-    time: "1w ago",
-    severity: "success",
-    severityLabel: "Improved",
-  },
-];
-
-const SEVERITY_BADGE: Record<Severity, string> = {
-  danger:  "badge-danger",
-  warning: "badge-warning",
-  success: "badge-success",
-  accent:  "badge-accent",
-  info:    "badge-primary",
+const SEV_CONFIG: Record<string, { badge: string; icon: React.ElementType; iconBg: string; iconColor: string }> = {
+  critical: { badge: "badge-danger",                            icon: AlertTriangle, iconBg: "bg-danger-muted",  iconColor: "text-danger"     },
+  high:     { badge: "badge-warning",                           icon: AlertTriangle, iconBg: "bg-warning-muted", iconColor: "text-warning"    },
+  medium:   { badge: "badge bg-yellow-400/10 text-yellow-400", icon: TrendingUp,    iconBg: "bg-yellow-400/10", iconColor: "text-yellow-400" },
+  low:      { badge: "badge-success",                           icon: Shield,        iconBg: "bg-success-muted", iconColor: "text-success"    },
+  info:     { badge: "badge-accent",                            icon: Sparkles,      iconBg: "bg-accent-muted",  iconColor: "text-accent"     },
 };
 
-// ── component ──────────────────────────────────────────────────────────────────
+function InsightCard({ insight }: { insight: InsightItem }) {
+  const cfg  = SEV_CONFIG[insight.severity] ?? SEV_CONFIG.info;
+  const Icon = cfg.icon;
+
+  return (
+    <div className="glass-card-hover p-5 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <div className={`p-2.5 rounded-lg shrink-0 ${cfg.iconBg}`}>
+          <Icon className={`h-5 w-5 ${cfg.iconColor}`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-semibold text-text-primary">{insight.title}</h3>
+            <span className={cfg.badge}>{insight.severityLabel}</span>
+            {insight.isNew && (
+              <span className="badge bg-primary/15 text-accent text-[10px]">New</span>
+            )}
+          </div>
+          <p className="text-[11px] font-semibold text-text-secondary mt-0.5 truncate">
+            {insight.walletLabel}
+          </p>
+          <p className="text-[10px] font-mono text-text-muted">{insight.wallet}</p>
+        </div>
+      </div>
+
+      <p className="text-xs text-text-secondary leading-relaxed">{insight.description}</p>
+
+      {insight.riskScore > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-text-muted shrink-0">Risk</span>
+          <div className="flex-1 h-1.5 rounded-full bg-surface-3 overflow-hidden">
+            <div
+              className={`h-full rounded-full ${
+                insight.riskScore >= 80 ? "bg-danger"     :
+                insight.riskScore >= 60 ? "bg-warning"    :
+                insight.riskScore >= 35 ? "bg-yellow-400" : "bg-success"
+              }`}
+              style={{ width: `${insight.riskScore}%` }}
+            />
+          </div>
+          <span className="text-[10px] font-semibold text-text-primary shrink-0 w-6 text-right">
+            {insight.riskScore}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
+        <div className="flex items-center gap-1 text-[10px] text-text-muted">
+          <Clock className="h-3 w-3" />
+          {insight.analyzedAt
+            ? new Date(insight.analyzedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            : "—"}
+        </div>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`/dashboard/wallets/${insight.walletId}`}>
+            View Wallet <ExternalLink className="h-3 w-3 ml-1" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function InsightsView() {
+  const { data, isLoading, isError, refetch } = useInsights();
+  const generateMutation = useGenerateInsights();
+
+  const stats    = data?.stats;
+  const insights = data?.insights ?? [];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -129,71 +94,131 @@ function InsightsView() {
         <div>
           <h1 className="text-xl font-bold text-text-primary">Insights</h1>
           <p className="text-sm text-text-secondary">
-            AI-generated intelligence across your saved wallets
+            AI-generated intelligence across your saved wallets.
           </p>
         </div>
-        <Button variant="accent" size="sm">
-          <Brain className="h-3.5 w-3.5" /> Generate Insights
-        </Button>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(({ label, value, sub, color }) => (
-          <div key={label} className="stat-card">
-            <p className="text-xs text-text-muted">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs text-text-muted">{sub}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Insight cards grid */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {INSIGHTS.map((insight) => {
-          const Icon = insight.icon;
-          return (
-            <div key={insight.id} className="glass-card-hover p-5 flex flex-col gap-3">
-              {/* Icon + title row */}
-              <div className="flex items-start gap-3">
-                <div className={`p-2.5 rounded-lg shrink-0 ${insight.iconBg}`}>
-                  <Icon className={`h-5 w-5 ${insight.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-text-primary">{insight.title}</h3>
-                    <span className={SEVERITY_BADGE[insight.severity]}>{insight.severityLabel}</span>
-                  </div>
-                  <p className="text-[11px] font-mono text-text-muted mt-0.5">{insight.wallet}</p>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-xs text-text-secondary leading-relaxed">{insight.description}</p>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
-                <span className="badge bg-surface-3 text-text-muted">{insight.time}</span>
-                <Button variant="ghost" size="sm">
-                  View Details →
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Empty-state prompt */}
-      <div className="glass-card p-6 flex flex-col items-center gap-3 text-center">
-        <div className="p-3 rounded-full bg-primary/10">
-          <Info className="h-6 w-6 text-accent" />
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => refetch()} disabled={isLoading}>
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={() => generateMutation.mutate()}
+            loading={generateMutation.isPending}
+          >
+            <Brain className="h-3.5 w-3.5" />
+            {generateMutation.isPending ? "Generating…" : "Generate Insights"}
+          </Button>
         </div>
-        <p className="text-sm font-semibold text-text-primary">Want deeper insights?</p>
-        <p className="text-xs text-text-secondary max-w-md">
-          Add more wallets to your watchlist and run a fresh analysis to surface new AI-generated intelligence about your portfolio.
-        </p>
-        <Button variant="secondary" size="sm">Browse Saved Wallets</Button>
       </div>
+
+      {/* Stats */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[0,1,2,3].map((i) => <CardSkeleton key={i} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Total Insights",  value: stats?.total ?? 0,        color: "text-accent",   sub: "across all wallets"  },
+            { label: "High Priority",   value: stats?.highPriority ?? 0, color: "text-danger",   sub: "require attention"   },
+            { label: "Analyses (Week)", value: stats?.thisWeek ?? 0,     color: "text-primary",  sub: "run this week"       },
+            { label: "Avg Risk Score",  value: stats?.avgRiskScore ?? 0, color: "text-warning",  sub: "across saved wallets"},
+          ].map(({ label, value, color, sub }) => (
+            <div key={label} className="stat-card">
+              <p className="text-xs text-text-muted">{label}</p>
+              <p className={`text-2xl font-bold ${color}`}>{value}</p>
+              <p className="text-xs text-text-muted">{sub}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {isError && (
+        <ErrorState
+          title="Failed to load insights"
+          message="Could not generate insights from your wallets. Make sure you have saved wallets with analyses."
+          onRetry={() => refetch()}
+        />
+      )}
+
+      {/* Skeleton grid */}
+      {isLoading && (
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[0,1,2,3,4,5].map((i) => (
+            <div key={i} className="glass-card p-5 space-y-3">
+              <div className="flex gap-3">
+                <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /></div>
+              </div>
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-1.5 w-full rounded-full" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && insights.length === 0 && (
+        <div className="space-y-4">
+          <EmptyState
+            icon={<Brain className="h-10 w-10 text-text-muted" />}
+            title="No insights yet"
+            description='Save wallets, run analyses, then click "Generate Insights" to scan your portfolio for AI-powered intelligence.'
+            action={{ label: "Generate Insights Now", onClick: () => generateMutation.mutate() }}
+          />
+          <div className="glass-card p-5 flex gap-3 items-start border-accent/20">
+            <Info className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <div className="text-xs text-text-secondary leading-relaxed">
+              <strong className="text-text-primary">How it works:</strong> InjSight AI analyses each of your saved wallets —
+              checking concentration risk, stablecoin buffers, risk scores, and token diversification.
+              Each wallet generates actionable insights automatically.{" "}
+              <Link href="/dashboard/wallets" className="text-accent hover:underline">Add wallets →</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Insight cards */}
+      {!isLoading && insights.length > 0 && (
+        <>
+          {generateMutation.isSuccess && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success-muted border border-success/20 animate-fade-in">
+              <Brain className="h-4 w-4 text-success shrink-0" />
+              <p className="text-xs text-success font-semibold">
+                {insights.length} insight{insights.length !== 1 ? "s" : ""} generated from your saved wallets.
+              </p>
+            </div>
+          )}
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {insights.map((insight) => (
+              <InsightCard key={insight.id} insight={insight} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Footer */}
+      {!isLoading && !isError && (
+        <div className="glass-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <Info className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Want deeper insights?</p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Add more wallets and run fresh analyses. Insights are re-generated from real on-chain data every time.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button variant="secondary" size="sm" asChild><Link href="/dashboard/wallets">Saved Wallets</Link></Button>
+            <Button variant="ghost" size="sm" asChild><Link href="/analyze">Analyze Wallet</Link></Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
