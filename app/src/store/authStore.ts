@@ -67,6 +67,16 @@ export const useAuthStore = create<AuthState>()(
 
       isAuthenticated: () => !!get().token && !!get().user,
     }),
-    { name: "injsight-auth", partialize: (s) => ({ token: s.token, user: s.user }) }
+    {
+      name: "injsight-auth",
+      partialize: (s) => ({ token: s.token, user: s.user }),
+      // After Zustand rehydrates from localStorage, sync the token to the
+      // direct key so apiClient can read it on the very first request.
+      onRehydrateStorage: () => (state) => {
+        if (state?.token && typeof window !== "undefined") {
+          localStorage.setItem("injsight_token", state.token);
+        }
+      },
+    }
   )
 );

@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
-import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 const passwordChecks = [
   { label: "At least 8 characters",  test: (p: string) => p.length >= 8 },
@@ -14,26 +15,56 @@ const passwordChecks = [
 ];
 
 export function SignUpForm() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const router       = useRouter();
+  const { register } = useAuthStore();
 
-  const strength = passwordChecks.filter((c) => c.test(password)).length;
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm,  setConfirm]  = useState("");
+  const [showPw,   setShowPw]   = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
+
+  const strength      = passwordChecks.filter((c) => c.test(password)).length;
   const strengthLabel = ["Weak", "Weak", "Fair", "Good", "Strong"][strength];
   const strengthColor = ["bg-danger", "bg-danger", "bg-warning", "bg-yellow-400", "bg-success"][strength];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (strength < 2) {
+      setError("Please choose a stronger password.");
+      return;
+    }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    router.push("/dashboard");
+    setError("");
+    try {
+      await register(email.trim(), password);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string; detail?: string } } })
+          ?.response?.data?.message ??
+        (err as { response?: { data?: { detail?: string } } })
+          ?.response?.data?.detail ??
+        "Registration failed. The email may already be in use.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-danger-muted border border-danger/25">
+          <AlertCircle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
+          <p className="text-xs text-danger leading-relaxed">{error}</p>
+        </div>
+      )}
       <Input
         label="Email address"
         type="email"
