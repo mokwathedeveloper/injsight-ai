@@ -1,286 +1,292 @@
-# InjSight AI — Injective Wallet Intelligence Platform
+<div align="center">
 
-> **AI-powered wallet analysis for the Injective DeFi ecosystem.**  
-> Understand any Injective wallet in seconds — risk scores, portfolio composition, AI reports, and real-time alerts.
+# InjSight AI
+
+### The AI-Native Wallet Intelligence Platform for Injective DeFi
+
+**Understand any Injective wallet in seconds. No private keys. No wallet connection.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green)](https://fastapi.tiangolo.com)
-[![Injective](https://img.shields.io/badge/Injective-Mainnet-blue)](https://injective.com)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python-green?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Injective](https://img.shields.io/badge/Injective-Mainnet-0066FF)](https://injective.com)
+[![OpenRouter](https://img.shields.io/badge/AI-OpenRouter%20%2B%20LangChain-orange)](https://openrouter.ai)
+[![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E)](https://supabase.com)
+
+[**Live Demo**](https://injsight-ai.vercel.app) · [**API Docs**](https://injsight-ai.railway.app/docs) · [**Twitter**](https://twitter.com/injsightai)
+
+</div>
 
 ---
 
-## What Is InjSight AI?
+## The Problem
 
-InjSight AI is a **read-only, non-custodial wallet intelligence platform** for Injective DeFi users. Paste any Injective wallet address and receive:
+The Injective DeFi ecosystem has **$2B+ in on-chain activity**, yet there is no native AI-powered tool that lets a user understand a wallet's risk profile in plain English. 
 
-- **AI-generated risk report** — plain-English analysis of portfolio health
-- **Live risk score (0–100)** — concentration, volatility, stablecoin buffer, diversification
-- **Real portfolio composition** — live token balances with CoinGecko USD prices
-- **Ask Your Wallet chat** — converse with AI about any wallet in natural language
-- **Smart alerts** — risk change notifications and large movement detection
-- **Watchlist monitoring** — track multiple wallets continuously
+Existing solutions:
+- **Nansen / Messari** — expensive ($150/mo+), not Injective-native, no AI chat
+- **DeBank** — portfolio tracking only, no risk intelligence, no AI
+- **Injective Explorer** — raw data, no insights, not usable by non-technical users
 
-No private keys. No seed phrases. No wallet connection required.
+**InjSight AI fills this gap** — the first AI-native wallet intelligence platform purpose-built for Injective.
 
 ---
 
-## How AI Is Used
+## The Solution
 
-InjSight AI uses AI at every layer of the analysis pipeline:
+Paste any `inj1...` wallet address. Get a complete AI intelligence report in under 10 seconds.
 
-### 1. OpenRouter AI (Primary — via LangChain)
-- **Model:** `meta-llama/llama-3.3-70b-instruct` (with `gpt-4o-mini` fallback)
-- **Used for:** Generating structured JSON wallet intelligence reports
-- **Output:** `summary`, `concentrationAnalysis`, `riskExplanation`, `injectiveContext`, `suggestedNextSteps`, `disclaimer`
+```
+inj1qg5ega6dykkxc307y25pecuufrjkxkaggkkxh
+         ↓  (10 seconds)
+✅ Portfolio: $12,450 across 3 tokens
+✅ Risk Score: 53/100 — Moderate Risk
+✅ AI Summary: "INJ at 64% is elevated. Stablecoin buffer of 24% is healthy..."
+✅ Next Steps: ["Reduce INJ below 50%", "Consider ATOM for diversification"]
+✅ Chat: "Why is INJ risky?" → AI answers in context
+```
 
-### 2. LangChain Agent (ReAct-style)
-A multi-step reasoning agent with 4 custom tools:
+**No wallet connection. No private keys. 100% read-only.**
 
-| Tool | Purpose |
+---
+
+## How AI Powers InjSight
+
+### Layer 1 — LangChain ReAct Agent
+
+A multi-step reasoning agent that autonomously:
+1. Fetches live on-chain data via `InjectiveWalletTool`
+2. Computes risk via `RiskAnalysisTool` (concentration, volatility, stablecoin buffer, diversification)
+3. Gets live prices via `LivePriceTool` (CoinGecko)
+4. Generates intelligence via `PortfolioInsightsTool` (OpenRouter LLM)
+
+### Layer 2 — OpenRouter AI (Production LLM)
+
+- **Primary model:** `meta-llama/llama-3.3-70b-instruct`
+- **Fallback:** `openai/gpt-4o-mini`
+- **Output:** Structured JSON report — summary, risk explanation, Injective context, next steps
+- **Graceful degradation:** deterministic rule-based engine when AI is unavailable
+
+### Layer 3 — Ask Your Wallet (Conversational AI)
+
+Real-time Q&A about any wallet. AI has full context: portfolio value, risk score, every token holding.
+
+```
+User: "Why is this wallet considered high risk?"
+AI:   "The 64% INJ concentration is the primary factor. A 20% INJ price drop 
+       would reduce the portfolio by $1,590. The stablecoin buffer of 24% 
+       partially hedges this — but single-asset dominance creates elevated risk."
+```
+
+---
+
+## Injective Integration
+
+InjSight is purpose-built for Injective — not a generic portfolio tool retrofitted:
+
+| Integration | Details |
 |---|---|
-| `InjectiveWalletTool` | Fetches real on-chain token balances from Injective LCD |
-| `RiskAnalysisTool` | Computes multi-dimensional risk scores |
-| `LivePriceTool` | Gets real-time USD prices from CoinGecko |
-| `PortfolioInsightsTool` | Generates structured AI portfolio insights |
-
-### 3. Ask Your Wallet (Conversational AI)
-- Users can ask questions like *"Why is this wallet high risk?"* or *"What are the top assets?"*
-- Full conversation history maintained per session
-- AI has real-time wallet context injected into every response
-
-### 4. Rule-Based Fallback
-- If AI providers are unavailable, a deterministic risk engine still provides accurate scores
-- Ensures 100% uptime regardless of AI provider status
-
----
-
-## How Injective Is Integrated
-
-InjSight AI is purpose-built for the **Injective blockchain**:
-
-### On-Chain Data
-- **Injective LCD REST API** (`https://lcd.injective.network`) — real-time token balances
-- Three fallback public nodes for 99.9% data availability
-- Native INJ token and all Injective ecosystem tokens (USDT peggy, IBC ATOM, TIA, etc.)
-- Denom-to-symbol mapping for all major Injective assets
-
-### Injective-Specific Intelligence
-- INJ concentration risk detection (Injective's native volatile asset)
-- Helix DEX exposure analysis
-- IBC asset categorization (Cosmos ecosystem tokens)
-- Peggy bridge token identification (USDT, USDC, WBTC)
-- Staking position detection via LCD staking endpoints
-
-### Ecosystem Context
-Every AI report includes an **Injective Context** section covering:
-- INJ staking recommendations
-- Helix DEX opportunities
-- Ecosystem diversification guidance
-- Injective-native DeFi protocol exposure
+| **Injective LCD REST API** | Live token balances from `lcd.injective.network` (3 fallback nodes) |
+| **INJ Risk Model** | INJ-specific concentration thresholds based on ecosystem volatility |
+| **Peggy Token Support** | USDT, USDC, WBTC via Injective's Ethereum bridge |
+| **IBC Ecosystem** | ATOM, TIA, and all IBC tokens with correct decimals |
+| **Helix DEX Context** | AI reports include Injective DEX exposure analysis |
+| **Staking Awareness** | Detects staked INJ positions via LCD staking endpoints |
+| **Injective AI Context** | Every report has an `injectiveContext` field — ecosystem-specific guidance |
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| Wallet Analyzer | Real-time analysis of any inj1... address |
-| Portfolio Summary | Live token balances + USD values |
-| Risk Score | Multi-factor 0–100 risk assessment |
-| AI Report | OpenRouter LLM-generated intelligence |
-| Ask Your Wallet | Conversational AI about any wallet |
-| Saved Wallets | Persist and monitor wallets |
-| Analysis History | Full audit trail of all analyses |
-| Alerts | Risk change + large transfer notifications |
-| Watchlist | Monitor wallets without saving |
-| Weekly AI Reports | Scheduled digest of portfolio changes |
-| Treasury Monitoring | Multi-wallet treasury dashboard |
-| Team Workspace | Shared wallets and analysis for teams |
-| API Access | REST API for programmatic access |
-| Admin Dashboard | Usage analytics and system health |
+<table>
+<tr>
+<td>
 
----
+**Core Intelligence**
+- 🔍 Real-time wallet analysis
+- 📊 Multi-factor risk scoring (0–100)
+- 🤖 AI-generated reports (OpenRouter)
+- 💬 Ask Your Wallet chat
+- 📈 Portfolio composition charts
+- 🔄 Live CoinGecko prices
 
-## Tech Stack
+</td>
+<td>
 
-### Frontend
-- **Next.js 14** — App Router, TypeScript, Server Components
-- **Tailwind CSS** — Design system with dark fintech theme
-- **TanStack Query** — Real-time data fetching with caching
-- **Zustand** — Auth state management with persistence
-- **Recharts** — Portfolio and risk visualizations
-- **Supabase Realtime** — Live alert subscriptions
+**Platform**
+- 💾 Save & monitor wallets
+- 🚨 Risk change alerts
+- ⭐ Watchlist tracking
+- 📋 Analysis history
+- 📄 Weekly AI digest reports
+- 🏦 Treasury monitoring
 
-### Backend
-- **FastAPI** — High-performance Python API
-- **PostgreSQL** (Supabase) — Production database
-- **SQLAlchemy + Alembic** — ORM and migrations
-- **LangChain** — AI agent framework with custom tools
-- **OpenRouter API** — Multi-model AI access (Llama, GPT-4, Claude)
+</td>
+<td>
 
-### AI / Blockchain
-- **OpenRouter** (`meta-llama/llama-3.3-70b-instruct`) — Primary AI
-- **LangChain ReAct Agent** — Multi-step reasoning pipeline
-- **Injective LCD API** — Real-time on-chain data
-- **CoinGecko API** — Live token prices
+**Enterprise**
+- 👥 Team workspaces
+- 🔑 REST API access
+- 🪝 Webhook alerts
+- 📊 Admin analytics
+- 🔐 JWT authentication
+- ☁️ Supabase realtime
 
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- Python 3.11+
-- PostgreSQL (or Supabase account)
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/mokwathedeveloper/injsight-ai.git
-cd injsight-ai
-git checkout trunc
-```
-
-### 2. Backend setup
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Create .env from example
-cp .env.example .env
-# Edit .env — add your OPENROUTER_API_KEY and DATABASE_URL
-
-# Run migrations
-alembic upgrade head
-
-# Start backend
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-### 3. Frontend setup
-```bash
-cd app
-npm install
-
-# Create .env.local from example
-cp .env.example .env.local
-# Edit .env.local — set NEXT_PUBLIC_API_URL=http://localhost:8000/api
-
-# Start frontend
-npm run dev
-```
-
-### 4. Open the app
-```
-http://localhost:3000
-```
-
-### 5. Analyze a wallet
-1. Navigate to `/analyze`
-2. Paste any Injective wallet address (e.g. `inj1...`)
-3. Click **Analyze Wallet** — or click **Try Demo Wallet** to see it immediately
-
----
-
-## Environment Variables
-
-### Backend (`backend/.env`)
-```env
-DATABASE_URL=postgresql://...          # PostgreSQL connection string
-OPENROUTER_API_KEY=sk-or-v1-...        # OpenRouter API key (required for AI)
-SUPABASE_URL=https://...supabase.co    # Supabase project URL
-SUPABASE_SERVICE_KEY=eyJ...            # Supabase service_role key
-JWT_SECRET=your-secret-here            # JWT signing secret
-```
-
-### Frontend (`app/.env.local`)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-NEXT_PUBLIC_SUPABASE_URL=https://...supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-```
+</td>
+</tr>
+</table>
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     InjSight AI                          │
-├─────────────┬───────────────────────┬───────────────────┤
-│  Frontend   │      Backend          │    AI Layer        │
-│  Next.js 14 │      FastAPI          │   LangChain Agent  │
-│  TanStack Q │      SQLAlchemy       │   ┌─────────────┐  │
-│  Zustand    │      PostgreSQL       │   │ Wallet Tool │  │
-│  Recharts   │      JWT Auth         │   │ Risk Tool   │  │
-│  Supabase   │      ────────────     │   │ Price Tool  │  │
-│  Realtime   │      Injective LCD ──►│   │ Report Tool │  │
-│             │      CoinGecko API    │   └─────────────┘  │
-│             │                       │   OpenRouter LLM   │
-└─────────────┴───────────────────────┴───────────────────┘
+                        ┌─────────────────────────────────┐
+                        │         InjSight AI              │
+                        └─────────────────────────────────┘
+                                       │
+               ┌───────────────────────┼───────────────────────┐
+               ▼                       ▼                       ▼
+    ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+    │  Next.js 14 App  │   │   FastAPI Server  │   │   AI Layer       │
+    │                  │   │                  │   │                  │
+    │  TypeScript      │◄──│  SQLAlchemy ORM  │   │  LangChain Agent │
+    │  TanStack Query  │   │  PostgreSQL       │   │  4 Custom Tools  │
+    │  Zustand Auth    │   │  JWT Auth         │   │  OpenRouter LLM  │
+    │  Supabase RT     │   │  Alembic Migrate  │   │  Rule Fallback   │
+    └──────────────────┘   └──────────────────┘   └──────────────────┘
+             │                      │                       │
+             ▼                      ▼                       ▼
+    ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+    │ Vercel (Frontend)│   │ Railway (Backend) │   │  Injective LCD   │
+    │ Supabase (DB/RT) │   │ Supabase (Postgres│   │  CoinGecko API   │
+    └──────────────────┘   └──────────────────┘   └──────────────────┘
 ```
 
 ---
 
-## Security
+## Quick Start
 
-- **Read-only** — No wallet connections, no private keys, no transactions
-- **Non-custodial** — Zero fund access, zero signing permissions
-- **Data minimization** — Only public on-chain data processed
-- **JWT authentication** — Secure user sessions
-- **Row Level Security** — Supabase RLS policies per user
+### Option A — Docker (Recommended, 1 command)
+
+```bash
+git clone https://github.com/mokwathedeveloper/injsight-ai.git
+cd injsight-ai && git checkout trunc
+
+# Add your OpenRouter API key
+echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" >> backend/.env
+
+docker-compose up --build
+# → Frontend: http://localhost:3000
+# → Backend:  http://localhost:8000/docs
+```
+
+### Option B — Manual
+
+**Backend**
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env    # edit: add OPENROUTER_API_KEY, DATABASE_URL
+alembic upgrade head
+uvicorn app.main:app --port 8000
+```
+
+**Frontend**
+```bash
+cd app
+npm install
+cp .env.example .env.local    # edit: set NEXT_PUBLIC_API_URL
+npm run dev
+# → http://localhost:3000
+```
 
 ---
 
-## Demo
+## API Reference
 
-> **Live demo:** [Coming soon — deploying to Vercel + Railway]
+Base URL: `https://injsight-ai.railway.app/api`  
+Interactive docs: `/docs`
 
-To try locally with demo data:
-1. Start both servers (see Getting Started above)
-2. Go to `http://localhost:3000/analyze?demo=true`
-3. Explore the full AI analysis with live CoinGecko prices
+```bash
+# Analyze any wallet (no auth required)
+curl -X POST /public/analyze-wallet \
+  -d '{"walletAddress": "inj1qg5ega..."}'
+
+# AI Chat about a wallet
+curl -X POST /v1/ai/chat \
+  -d '{"address": "inj1...", "question": "What is the biggest risk?"}'
+
+# Get saved wallets (auth required)
+curl -H "Authorization: Bearer {token}" /wallets
+```
 
 ---
 
-## Project Structure
+## Why InjSight AI Wins
 
-```
-injsight-ai/
-├── app/                    # Next.js 14 frontend
-│   ├── src/
-│   │   ├── app/            # App Router pages (53 routes)
-│   │   ├── components/     # UI, layout, wallet, dashboard components
-│   │   ├── hooks/          # TanStack Query data hooks
-│   │   ├── store/          # Zustand auth store
-│   │   └── lib/            # API client, utilities
-│   └── public/             # Static assets
-├── backend/                # FastAPI backend
-│   ├── app/
-│   │   ├── ai/             # OpenRouter + LangChain agent
-│   │   ├── analysis/       # Wallet analysis service
-│   │   ├── auth/           # JWT authentication
-│   │   ├── integrations/   # Injective LCD integration
-│   │   ├── models/         # SQLAlchemy ORM models
-│   │   └── services/       # Supabase realtime client
-│   └── migrations/         # Alembic database migrations
-├── design/                 # UI mockups (53 PNG screens)
-└── docs/                   # Architecture and implementation docs
-```
+| Metric | Competitors | InjSight AI |
+|---|---|---|
+| **Injective-native** | ❌ Generic tools | ✅ Built for Injective |
+| **AI Reports** | ❌ Raw data only | ✅ Plain-English AI |
+| **AI Chat** | ❌ None | ✅ Ask Your Wallet |
+| **LangChain Agent** | ❌ None | ✅ Multi-tool pipeline |
+| **No wallet needed** | ❌ MetaMask required | ✅ Paste address only |
+| **Real-time alerts** | ❌ Manual check | ✅ Supabase Realtime |
+| **Open Source** | ❌ Closed | ✅ MIT License |
+| **API access** | ❌ Expensive tiers | ✅ Free tier included |
+| **Deployment** | ❌ Complex setup | ✅ One docker-compose |
+
+---
+
+## Roadmap
+
+- [x] Real-time Injective LCD data
+- [x] OpenRouter AI reports  
+- [x] LangChain agent pipeline
+- [x] Ask Your Wallet chat
+- [x] Supabase realtime alerts
+- [x] Team workspaces
+- [x] REST API + Webhooks
+- [ ] Injective transaction history analysis
+- [ ] DeFi protocol position tracking (Helix, Mito, Astroport)
+- [ ] Cross-chain wallet comparison (Cosmos ecosystem)
+- [ ] AI-powered market context (INJ price impact analysis)
+- [ ] Mobile app (React Native)
+- [ ] Injective Name Service (INS) resolution
+
+---
+
+## Security & Trust
+
+- **100% Read-Only** — Zero write access to any blockchain
+- **Non-Custodial** — Never requests private keys, seed phrases, or signing
+- **Data Minimization** — Only public on-chain data processed
+- **Row Level Security** — Supabase RLS: users only see their own data
+- **JWT Auth** — Secure stateless authentication
+- **Open Source** — All code auditable on GitHub
+
+> InjSight AI is an informational analytics tool. It does not provide financial advice. Always do your own research.
 
 ---
 
 ## Built For
 
-**Injective Solo AI Builder Sprint** — AI Coding Bounty  
-Dates: 11/05/2026 – 31/05/2026
+**Injective Solo AI Builder Sprint** | May 11–31, 2026  
+Category: Consumer AI App + Autonomous Agent  
+Blockchain: Injective Mainnet
 
-Built with ❤️ for the Injective DeFi community.
+---
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+[MIT](LICENSE) © 2026 InjSight AI
