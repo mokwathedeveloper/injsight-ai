@@ -152,9 +152,8 @@ CREATE OR REPLACE TRIGGER trg_wallets_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ── 9. Row Level Security (RLS) ───────────────────────────────
--- Supabase requires RLS for security.
--- Our FastAPI backend uses the service_role key and bypasses RLS.
--- These policies allow authenticated Supabase JS clients read-only access.
+-- Supabase runs PostgreSQL 15 — CREATE POLICY does NOT support IF NOT EXISTS.
+-- Drop existing policies first so this script is safe to re-run.
 
 ALTER TABLE users                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallets               ENABLE ROW LEVEL SECURITY;
@@ -164,27 +163,39 @@ ALTER TABLE risk_scores           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alerts                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_events          ENABLE ROW LEVEL SECURITY;
 
--- Users can only see/edit their own rows
-CREATE POLICY IF NOT EXISTS "users: own row"
+-- Drop policies first (safe if they don't exist — errors are suppressed below)
+DO $$ BEGIN
+    DROP POLICY IF EXISTS "users: own row"          ON users;
+    DROP POLICY IF EXISTS "wallets: own rows"        ON wallets;
+    DROP POLICY IF EXISTS "analyses: own rows"       ON wallet_analysis_runs;
+    DROP POLICY IF EXISTS "ai_reports: own rows"     ON ai_reports;
+    DROP POLICY IF EXISTS "alerts: own rows"         ON alerts;
+    DROP POLICY IF EXISTS "risk_scores: deny direct" ON risk_scores;
+    DROP POLICY IF EXISTS "usage_events: deny direct" ON usage_events;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
+-- Create policies (no IF NOT EXISTS — not supported in PostgreSQL 15)
+CREATE POLICY "users: own row"
     ON users FOR ALL USING (auth.uid()::text = id::text);
 
-CREATE POLICY IF NOT EXISTS "wallets: own rows"
+CREATE POLICY "wallets: own rows"
     ON wallets FOR ALL USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "analyses: own rows"
+CREATE POLICY "analyses: own rows"
     ON wallet_analysis_runs FOR ALL USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "ai_reports: own rows"
+CREATE POLICY "ai_reports: own rows"
     ON ai_reports FOR ALL USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "alerts: own rows"
+CREATE POLICY "alerts: own rows"
     ON alerts FOR ALL USING (auth.uid()::text = user_id::text);
 
--- Backend-only tables: no direct client access
-CREATE POLICY IF NOT EXISTS "risk_scores: deny direct"
+-- Backend-only tables: deny all direct client access
+CREATE POLICY "risk_scores: deny direct"
     ON risk_scores FOR ALL USING (FALSE);
 
-CREATE POLICY IF NOT EXISTS "usage_events: deny direct"
+CREATE POLICY "usage_events: deny direct"
     ON usage_events FOR ALL USING (FALSE);
 
 -- ── Done ─────────────────────────────────────────────────────
