@@ -14,10 +14,33 @@ const passwordChecks = [
   { label: "1 uppercase letter",     test: (p: string) => /[A-Z]/.test(p) },
 ];
 
+/** Extract a human-readable string from any FastAPI error shape. */
+function extractErrorMsg(err: unknown, fallback: string): string {
+  const data = (err as { response?: { data?: unknown } })?.response?.data as Record<string, unknown> | undefined;
+  if (!data) return fallback;
+
+  // { message: "string" }
+  if (typeof data.message === "string") return data.message;
+
+  // { detail: "string" }
+  if (typeof data.detail === "string") return data.detail;
+
+  // FastAPI Pydantic 422: { detail: [{ msg, loc, type, input }] }
+  if (Array.isArray(data.detail) && data.detail.length > 0) {
+    const first = data.detail[0] as Record<string, unknown>;
+    const field = Array.isArray(first.loc) ? (first.loc as string[]).slice(-1)[0] : "";
+    const msg   = typeof first.msg === "string" ? first.msg : "";
+    return field ? `${field}: ${msg}` : msg || fallback;
+  }
+
+  return fallback;
+}
+
 export function SignUpForm() {
   const router       = useRouter();
   const { register } = useAuthStore();
 
+  const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
   const [confirm,  setConfirm]  = useState("");
@@ -31,27 +54,15 @@ export function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (strength < 2) {
-      setError("Please choose a stronger password.");
-      return;
-    }
+    if (password !== confirm) { setError("Passwords do not match."); return; }
+    if (strength < 2)          { setError("Please choose a stronger password."); return; }
     setLoading(true);
     setError("");
     try {
-      await register(email.trim(), password);
+      await register(email.trim(), password, name.trim() || undefined);
       router.push("/dashboard");
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string; detail?: string } } })
-          ?.response?.data?.message ??
-        (err as { response?: { data?: { detail?: string } } })
-          ?.response?.data?.detail ??
-        "Registration failed. The email may already be in use.";
-      setError(msg);
+      setError(extractErrorMsg(err, "Registration failed. The email may already be in use."));
     } finally {
       setLoading(false);
     }
@@ -66,12 +77,21 @@ export function SignUpForm() {
         </div>
       )}
       <Input
+        label="Full name (optional)"
+        type="text"
+        placeholder="Your name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        autoComplete="name"
+      />
+      <Input
         label="Email address"
         type="email"
         placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
+        autoComplete="email"
       />
 
       <div className="space-y-1.5">

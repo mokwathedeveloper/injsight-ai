@@ -27,12 +27,14 @@ export function LoginForm() {
       await login(email.trim(), pw);
       router.push("/dashboard");
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string; detail?: string } } })
-          ?.response?.data?.message ??
-        (err as { response?: { data?: { detail?: string } } })
-          ?.response?.data?.detail ??
-        "Invalid email or password. Please try again.";
+      const data = (err as { response?: { data?: unknown } })?.response?.data as Record<string, unknown> | undefined;
+      let msg = "Invalid email or password. Please try again.";
+      if (typeof data?.message === "string") msg = data.message;
+      else if (typeof data?.detail === "string") msg = data.detail;
+      else if (Array.isArray(data?.detail) && (data!.detail as unknown[]).length > 0) {
+        const first = (data!.detail as Record<string, unknown>[])[0];
+        msg = typeof first.msg === "string" ? first.msg : msg;
+      }
       setError(msg);
     } finally {
       setLoading(false);
