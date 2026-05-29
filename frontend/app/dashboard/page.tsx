@@ -8,9 +8,12 @@ import { RecentAnalysisTable } from "@/components/dashboard/RecentAnalysisTable"
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { MOCK_DASHBOARD_DATA } from "@/data/user-dashboard-mock";
 import { Wallet, Shield, Bell, BarChart3 } from "lucide-react";
+import { useUserDashboard } from "@/hooks/useDashboardData";
 
 export default function DashboardPage() {
-  const data = MOCK_DASHBOARD_DATA;
+  // Live data when authenticated; mock fallback otherwise so the UI never breaks.
+  const live = useUserDashboard();
+  const data = live ?? MOCK_DASHBOARD_DATA;
 
   return (
     <AppShell>

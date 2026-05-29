@@ -7,13 +7,38 @@ import { AddToWatchlistButton } from "./AddToWatchlistButton";
 import { MOCK_WATCHLIST_WALLETS, MOCK_WATCHLIST_SUMMARY } from "@/data/watchlist-mock";
 import { LayoutGrid, List, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWallets, useDeleteWallet, useAlerts } from "@/hooks/useDashboardData";
+import { useAuthStore } from "@/store/auth";
+import { adaptWatchlistWallet } from "@/lib/api/adapters";
 
 export function WatchlistDashboard() {
   const [wallets, setWallets] = React.useState(MOCK_WATCHLIST_WALLETS);
-  const summary = MOCK_WATCHLIST_SUMMARY;
+
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const { data: liveWallets } = useWallets();
+  const { data: liveAlerts } = useAlerts();
+  const deleteWallet = useDeleteWallet();
+
+  React.useEffect(() => {
+    if (liveWallets) setWallets(liveWallets.map(adaptWatchlistWallet));
+  }, [liveWallets]);
+
+  const summary = React.useMemo(() => {
+    if (!liveWallets) return MOCK_WATCHLIST_SUMMARY;
+    const analyzed = wallets.filter((w) => w.riskScore > 0);
+    return {
+      totalValueUsd: wallets.reduce((s, w) => s + (w.totalValueUsd || 0), 0),
+      avgRiskScore: analyzed.length
+        ? Math.round(analyzed.reduce((s, w) => s + w.riskScore, 0) / analyzed.length)
+        : 0,
+      activeAlerts: (liveAlerts ?? []).filter((a) => !a.isRead).length,
+      totalWallets: wallets.length,
+    };
+  }, [liveWallets, liveAlerts, wallets]);
 
   const handleRemoveWallet = (id: string) => {
     setWallets(wallets.filter(w => w.id !== id));
+    if (authed) deleteWallet.mutate(id);
   };
 
   return (
