@@ -5,6 +5,8 @@ import type { SavedWallet } from "@/types/saved-wallets";
 import type { AnalysisHistoryEntry } from "@/types/analysis-history";
 import type { DashboardAlertEntry, AlertType, AlertSeverity } from "@/types/alerts";
 import type { AIReportHubEntry } from "@/types/reports";
+import type { RecentAnalysis, DashboardAlert } from "@/types/user-dashboard";
+import type { WatchlistWallet } from "@/types/watchlist";
 
 const RISK_LEVELS: RiskLevel[] = ["Low", "Moderate", "High", "Very High"];
 const asRiskLevel = (v: string | null | undefined): RiskLevel =>
@@ -127,5 +129,40 @@ export function adaptReport(r: ApiReport): AIReportHubEntry {
     riskLevel: asRiskLevel(r.riskLevel),
     status: "ready",
     availableFormats: ["json", "csv", "pdf"],
+  };
+}
+
+export function adaptRecentAnalysis(e: AnalysisHistoryEntry): RecentAnalysis {
+  return {
+    id: e.id,
+    address: e.address,
+    timestamp: e.timestamp,
+    riskScore: e.riskScore,
+    totalValue: e.totalValueUsd,
+    status: e.status === "completed" ? "completed" : e.status === "failed" ? "failed" : "pending",
+  };
+}
+
+export function adaptDashboardAlert(a: DashboardAlertEntry): DashboardAlert {
+  return {
+    id: a.id,
+    type: a.type === "system" ? "security" : a.type,
+    severity: a.severity === "critical" ? "high" : a.severity,
+    message: a.message || a.title,
+    timestamp: a.timestamp,
+  };
+}
+
+export function adaptWatchlistWallet(w: SavedWallet): WatchlistWallet {
+  return {
+    id: w.id,
+    address: w.address,
+    label: w.label,
+    totalValueUsd: w.totalValueUsd,
+    change24h: 0,
+    riskScore: w.riskScore,
+    riskLevel: w.riskLevel,
+    lastSync: w.lastAnalyzed,
+    status: "up-to-date",
   };
 }

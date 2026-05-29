@@ -1,9 +1,18 @@
 "use client";
 
+import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { walletsApi, alertsApi, reportsApi, analysisApi } from "@/lib/api/endpoints";
-import { adaptWallet, adaptAlert, adaptReport, adaptHistoryEntry } from "@/lib/api/adapters";
+import {
+  adaptWallet,
+  adaptAlert,
+  adaptReport,
+  adaptHistoryEntry,
+  adaptRecentAnalysis,
+  adaptDashboardAlert,
+} from "@/lib/api/adapters";
 import { useAuthStore } from "@/store/auth";
+import type { UserDashboardData } from "@/types/user-dashboard";
 
 /**
  * Dashboard data hooks. Queries are only enabled when authenticated, so
@@ -97,4 +106,35 @@ export function useReports() {
     enabled,
     queryFn: async () => (await reportsApi.list()).map(adaptReport),
   });
+}
+
+/**
+ * Composes the Overview dashboard payload from live wallets, alerts, and
+ * analysis history. Returns null when not authenticated so the page can fall
+ * back to mock data.
+ */
+export function useUserDashboard(): UserDashboardData | null {
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const wallets = useWallets();
+  const alerts = useAlerts();
+  const history = useAnalysisHistory();
+
+  return React.useMemo(() => {
+    if (!authed || !wallets.data || !alerts.data || !history.data) return null;
+    const w = wallets.data;
+    const analyzed = w.filter((x) => x.riskScore > 0);
+    const avgRisk = analyzed.length
+      ? Math.round(analyzed.reduce((s, x) => s + x.riskScore, 0) / analyzed.length)
+      : 0;
+    return {
+      stats: {
+        totalWallets: w.length,
+        totalValueUsd: w.reduce((s, x) => s + (x.totalValueUsd || 0), 0),
+        activeAlerts: alerts.data.filter((a) => !a.isRead).length,
+        riskScoreAvg: avgRisk,
+      },
+      recentAnalyses: history.data.slice(0, 5).map(adaptRecentAnalysis),
+      alerts: alerts.data.slice(0, 5).map(adaptDashboardAlert),
+    };
+  }, [authed, wallets.data, alerts.data, history.data]);
 }
