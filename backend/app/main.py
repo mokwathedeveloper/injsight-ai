@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import models  # noqa: F401  (ensures models are registered on Base)
 from app.alerts.router import router as alerts_router
+from app.insights.router import router as insights_router
 from app.analysis.router import public_router, router as analysis_router
 from app.auth.router import router as auth_router
 from app.admin.router import router as admin_router
@@ -125,6 +126,7 @@ def create_app() -> FastAPI:
     app.include_router(wallets_router)
     app.include_router(reports_router)
     app.include_router(alerts_router)
+    app.include_router(insights_router)
     app.include_router(billing_router)
     app.include_router(teams_router)
     app.include_router(treasury_router)
