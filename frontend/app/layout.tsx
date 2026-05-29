@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { TrustSafetyBanner } from "@/components/ui/TrustSafetyBanner";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -23,9 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
-        <AlertBanner />
-        {children}
-        <TrustSafetyBanner />
+        <QueryProvider>
+          <AlertBanner />
+          {children}
+          <TrustSafetyBanner />
+        </QueryProvider>
       </body>
     </html>
   );

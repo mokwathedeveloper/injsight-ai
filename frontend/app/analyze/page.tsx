@@ -8,25 +8,37 @@ import { AnalysisLoadingState } from "@/components/analyzer/AnalysisLoadingState
 import { WalletReport } from "@/components/analyzer/WalletReport";
 import { EmptyAnalyzerState } from "@/components/analyzer/EmptyAnalyzerState";
 import { ReadOnlySafetyNotice } from "@/components/analyzer/ReadOnlySafetyNotice";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { mockAnalysisResult } from "@/data/wallet-analyzer";
+import { useWalletAnalysis } from "@/hooks/useWalletAnalysis";
+import type { WalletAnalysisResult } from "@/types/wallet-analyzer";
 
 export default function AnalyzePage() {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [result, setResult] = React.useState<typeof mockAnalysisResult | null>(null);
+  const [result, setResult] = React.useState<WalletAnalysisResult | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const analysis = useWalletAnalysis();
 
-  const handleAnalyze = (addr: string) => {
-    setIsLoading(true);
+  const handleAnalyze = async (addr: string) => {
     setResult(null);
-
-    // Simulate analysis delay with staged messages
-    setTimeout(() => {
-      setIsLoading(false);
-      setResult({
-        ...mockAnalysisResult,
-        address: addr,
-      });
-    }, 6000);
+    setError(null);
+    try {
+      // Live backend call (FastAPI). Real risk score + AI report.
+      const data = await analysis.mutateAsync(addr);
+      setResult(data);
+    } catch (err: any) {
+      if (err?.code === "INVALID_WALLET") {
+        // Surface real server-side validation.
+        setError(err.message);
+      } else {
+        // Backend unreachable (e.g. API not running): fall back to mock so the
+        // demo still works, and tell the user it's sample data.
+        setError("Live API unavailable — showing sample data.");
+        setResult({ ...mockAnalysisResult, address: addr });
+      }
+    }
   };
+
+  const isLoading = analysis.isPending;
 
   return (
     <div className="flex flex-col min-h-screen bg-page">
@@ -48,6 +60,11 @@ export default function AnalyzePage() {
           {/* Form Section */}
           <div className="space-y-6">
             <WalletAnalyzerForm onAnalyze={handleAnalyze} isLoading={isLoading} />
+            {error && (
+              <div className="max-w-3xl mx-auto">
+                <ErrorBanner message={error} onClose={() => setError(null)} />
+              </div>
+            )}
             <ReadOnlySafetyNotice />
           </div>
 
