@@ -10,10 +10,22 @@ import { ErrorPanel } from "@/components/admin/ErrorPanel";
 import {
   MOCK_ADMIN_STATS, MOCK_USAGE_SERIES, MOCK_COST_BREAKDOWN, MOCK_ADMIN_USERS, MOCK_ERROR_LOG,
 } from "@/data/admin-mock";
+import { adminApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
 import { Users, Activity, Zap, AlertTriangle } from "lucide-react";
 
 export default function AdminPage() {
-  const s = MOCK_ADMIN_STATS;
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const [stats, setStats] = React.useState(MOCK_ADMIN_STATS);
+  const [users, setUsers] = React.useState(MOCK_ADMIN_USERS);
+
+  React.useEffect(() => {
+    if (!authed) return;
+    adminApi.stats().then((d: any) => { if (d) setStats(d); }).catch(() => {});
+    adminApi.users().then((u: any[]) => { if (u?.length) setUsers(u); }).catch(() => {});
+  }, [authed]);
+
+  const s = stats;
   return (
     <AdminShell>
       <div className="space-y-8 animate-in fade-in duration-700">
@@ -35,7 +47,7 @@ export default function AdminPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2"><UserTable users={MOCK_ADMIN_USERS} /></div>
+          <div className="lg:col-span-2"><UserTable users={users} /></div>
           <ErrorPanel errors={MOCK_ERROR_LOG} />
         </div>
       </div>
