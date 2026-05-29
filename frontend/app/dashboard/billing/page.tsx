@@ -9,9 +9,30 @@ import { PlanLimitCard } from "@/components/dashboard/PlanLimitCard";
 import { LimitUpgradePrompt } from "@/components/dashboard/LimitUpgradePrompt";
 import { MOCK_BILLING_DATA } from "@/data/billing-mock";
 import { CreditCard, History, ShieldCheck, Zap } from "lucide-react";
+import { billingApi } from "@/lib/api/endpoints";
+import { useAuthStore } from "@/store/auth";
 
 export default function BillingPage() {
-  const data = MOCK_BILLING_DATA;
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const [data, setData] = React.useState(MOCK_BILLING_DATA);
+
+  React.useEffect(() => {
+    if (!authed) return;
+    billingApi.summary().then((b: any) => {
+      if (!b) return;
+      setData((prev) => ({
+        ...prev,
+        summary: {
+          ...prev.summary,
+          currentPlan: b.plan ?? prev.summary.currentPlan,
+          planName: b.plan ? b.plan.charAt(0).toUpperCase() + b.plan.slice(1) : prev.summary.planName,
+          amount: b.priceUsd ?? prev.summary.amount,
+          cycle: b.billingCycle ?? prev.summary.cycle,
+        },
+        invoices: b.invoices?.length ? b.invoices : prev.invoices,
+      }));
+    }).catch(() => {});
+  }, [authed]);
 
   return (
     <AppShell>
