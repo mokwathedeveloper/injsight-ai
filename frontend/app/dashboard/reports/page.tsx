@@ -11,13 +11,30 @@ import { MOCK_REPORTS, MOCK_REPORT_HUB_STATS } from "@/data/reports-mock";
 import { AIReportHubEntry } from "@/types/reports";
 import { FileText, ShieldAlert, Download, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useReports } from "@/hooks/useDashboardData";
 
 export default function ReportsPage() {
   const [reports, setReports] = React.useState(MOCK_REPORTS);
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [selectedReport, setSelectedReport] = React.useState<AIReportHubEntry | undefined>(undefined);
-  const stats = MOCK_REPORT_HUB_STATS;
+
+  const { data: liveReports } = useReports();
+  React.useEffect(() => {
+    if (liveReports) setReports(liveReports);
+  }, [liveReports]);
+
+  // Stats derive from the active report list so live + mock both stay accurate.
+  const stats = React.useMemo(() => {
+    if (!liveReports) return MOCK_REPORT_HUB_STATS;
+    const highRisk = liveReports.filter(r => r.riskLevel === "High" || r.riskLevel === "Very High").length;
+    return {
+      totalReports: liveReports.length,
+      highRiskReports: highRisk,
+      totalExports: 0,
+      lastGenerated: liveReports[0]?.dateGenerated ?? "—",
+    };
+  }, [liveReports]);
 
   const handleDeleteReport = (id: string) => {
     setReports(reports.filter(r => r.id !== id));

@@ -10,6 +10,8 @@ import { MOCK_RISK_CHANGES } from "@/data/risk-change-mock";
 import { AlertFilters, DashboardAlertEntry } from "@/types/alerts";
 import { Bell, Shield, Settings, Info, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useAlerts, useMarkAlertRead, useMarkAllAlertsRead, useDeleteAlert } from "@/hooks/useDashboardData";
+import { useAuthStore } from "@/store/auth";
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = React.useState<DashboardAlertEntry[]>(MOCK_ALERTS_LOG);
@@ -19,6 +21,16 @@ export default function AlertsPage() {
     severity: "all",
     isRead: "all",
   });
+
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const { data: liveAlerts } = useAlerts();
+  const markRead = useMarkAlertRead();
+  const markAllRead = useMarkAllAlertsRead();
+  const removeAlert = useDeleteAlert();
+
+  React.useEffect(() => {
+    if (liveAlerts) setAlerts(liveAlerts);
+  }, [liveAlerts]);
 
   const filteredAlerts = React.useMemo(() => {
     return alerts.filter(alert => {
@@ -35,14 +47,17 @@ export default function AlertsPage() {
 
   const handleDeleteAlert = (id: string) => {
     setAlerts(alerts.filter(a => a.id !== id));
+    if (authed) removeAlert.mutate(id);
   };
 
   const handleMarkAsRead = (id: string) => {
     setAlerts(alerts.map(a => a.id === id ? { ...a, isRead: true } : a));
+    if (authed) markRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
     setAlerts(alerts.map(a => ({ ...a, isRead: true })));
+    if (authed) markAllRead.mutate();
   };
 
   const latestRiskChanges = MOCK_RISK_CHANGES.slice(0, 2);

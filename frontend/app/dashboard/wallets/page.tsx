@@ -8,18 +8,35 @@ import { MOCK_SAVED_WALLETS } from "@/data/saved-wallets-mock";
 import { Plus, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useWallets, useSaveWallet, useDeleteWallet, useAnalyzeSavedWallet } from "@/hooks/useDashboardData";
+import { useAuthStore } from "@/store/auth";
 
 export default function WalletsPage() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [wallets, setWallets] = React.useState(MOCK_SAVED_WALLETS);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  const filteredWallets = wallets.filter(w => 
+  const authed = useAuthStore((s) => !!s.accessToken);
+  const { data: liveWallets } = useWallets();
+  const saveWallet = useSaveWallet();
+  const deleteWallet = useDeleteWallet();
+  const analyzeWallet = useAnalyzeSavedWallet();
+
+  // When authenticated, the backend list is the source of truth.
+  React.useEffect(() => {
+    if (liveWallets) setWallets(liveWallets);
+  }, [liveWallets]);
+
+  const filteredWallets = wallets.filter(w =>
     w.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
     w.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddWallet = (data: { address: string; label: string }) => {
+    if (authed) {
+      saveWallet.mutate({ address: data.address, label: data.label });
+      return;
+    }
     const newWallet = {
       id: `w-${Date.now()}`,
       label: data.label,
@@ -34,10 +51,16 @@ export default function WalletsPage() {
 
   const handleDeleteWallet = (id: string) => {
     setWallets(wallets.filter(w => w.id !== id));
+    if (authed) deleteWallet.mutate(id);
   };
 
   const handleRefreshWallet = (id: string) => {
-    setWallets(wallets.map(w => 
+    if (authed) {
+      // Re-run analysis on the backend; invalidation refreshes risk + value.
+      analyzeWallet.mutate(id);
+      return;
+    }
+    setWallets(wallets.map(w =>
       w.id === id ? { ...w, lastAnalyzed: "Just now" } : w
     ));
   };

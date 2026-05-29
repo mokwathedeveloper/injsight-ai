@@ -9,12 +9,18 @@ import { MOCK_ANALYSIS_HISTORY } from "@/data/analysis-history-mock";
 import { AnalysisHistoryFilters, AnalysisHistoryEntry } from "@/types/analysis-history";
 import { History, Shield, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useAnalysisHistory } from "@/hooks/useDashboardData";
 
 export default function HistoryPage() {
   const [entries, setEntries] = React.useState(MOCK_ANALYSIS_HISTORY);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [selectedEntry, setSelectedEntry] = React.useState<AnalysisHistoryEntry | null>(null);
-  
+
+  const { data: liveHistory } = useAnalysisHistory();
+  React.useEffect(() => {
+    if (liveHistory) setEntries(liveHistory);
+  }, [liveHistory]);
+
   const [filters, setFilters] = React.useState<AnalysisHistoryFilters>({
     search: "",
     riskLevel: "All",
