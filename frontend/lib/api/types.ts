@@ -67,6 +67,36 @@ export interface ApiWallet {
   isDemo: boolean;
   lastAnalyzedAt: string | null;
   createdAt: string;
+  riskScore: number | null;
+  riskLevel: string | null;
+  totalValueUsd: number | null;
+}
+
+export interface ApiAlert {
+  id: string;
+  walletAddress: string | null;
+  type: string;
+  severity: string;
+  title: string;
+  message: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface ApiReport {
+  id: string;
+  analysisRunId: string;
+  walletAddress: string;
+  title: string;
+  summary: string | null;
+  concentrationAnalysis: string | null;
+  riskExplanation: string | null;
+  injectiveContext: string | null;
+  suggestedNextSteps: string[];
+  riskScore: number | null;
+  riskLevel: string | null;
+  modelName: string | null;
+  createdAt: string;
 }
 
 export interface ApiUsage {

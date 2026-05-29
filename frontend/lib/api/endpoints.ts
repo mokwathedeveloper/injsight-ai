@@ -1,8 +1,10 @@
 /** Typed endpoint functions mapping to the documented API contract. */
 import { apiRequest } from "./client";
 import type {
+  ApiAlert,
   ApiAnalysis,
   ApiAuthResult,
+  ApiReport,
   ApiUsage,
   ApiUser,
   ApiWallet,
@@ -40,6 +42,19 @@ export const walletsApi = {
     apiRequest<ApiWallet>("/api/wallets", { method: "POST", body: { walletAddress, label }, auth: true }),
   remove: (id: string) => apiRequest<null>(`/api/wallets/${id}`, { method: "DELETE", auth: true }),
   analyze: (id: string) => apiRequest<ApiAnalysis>(`/api/wallets/${id}/analyze`, { method: "POST", auth: true }),
+};
+
+export const alertsApi = {
+  list: () => apiRequest<ApiAlert[]>("/api/alerts", { auth: true }),
+  markRead: (id: string) => apiRequest<ApiAlert>(`/api/alerts/${id}/read`, { method: "PUT", auth: true }),
+  markAllRead: () => apiRequest<null>("/api/alerts/read-all", { method: "PUT", auth: true }),
+  remove: (id: string) => apiRequest<null>(`/api/alerts/${id}`, { method: "DELETE", auth: true }),
+};
+
+export const reportsApi = {
+  list: () => apiRequest<ApiReport[]>("/api/reports", { auth: true }),
+  get: (id: string) => apiRequest<ApiReport>(`/api/reports/${id}`, { auth: true }),
+  remove: (id: string) => apiRequest<null>(`/api/reports/${id}`, { method: "DELETE", auth: true }),
 };
 
 export const usersApi = {
