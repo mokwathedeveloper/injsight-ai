@@ -25,6 +25,15 @@ class Settings(BaseSettings):
 
     service_name: str = "injsight-ai-api"
 
+    # Anthropic / AI
+    anthropic_api_key: str = ""
+
+    # Injective LCD REST API
+    injective_lcd_url: str = "https://lcd.injective.network"
+
+    # CoinGecko price API
+    coingecko_api_url: str = "https://api.coingecko.com/api/v3"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
