@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { TeamWalletCard } from "@/components/team/TeamWalletCard";
+import { SharedWatchlistTable } from "@/components/team/SharedWatchlistTable";
 import { SharedAlertRules } from "@/components/team/SharedAlertRules";
 import { MOCK_SHARED_WALLETS, MOCK_SHARED_ALERT_RULES } from "@/data/team-mock";
 import { ArrowLeft, Monitor } from "lucide-react";
@@ -28,13 +29,15 @@ export default function SharedWatchlistsPage() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-text-disabled uppercase tracking-widest px-1">Watched Wallets</h2>
+          <h2 className="text-xs font-bold text-text-disabled uppercase tracking-widest px-1">Quick View</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {MOCK_SHARED_WALLETS.map((w) => (
               <TeamWalletCard key={w.id} wallet={w} />
             ))}
           </div>
         </div>
+
+        <SharedWatchlistTable wallets={MOCK_SHARED_WALLETS} />
 
         <SharedAlertRules rules={MOCK_SHARED_ALERT_RULES} />
       </div>
