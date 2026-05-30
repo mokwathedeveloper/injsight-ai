@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=== Installing dependencies ==="
-pip install -r requirements.txt
+echo "=== Python version ==="
+python3 --version
+
+echo "=== Upgrading pip ==="
+pip install --upgrade pip
+
+echo "=== Installing dependencies (prefer pre-built wheels) ==="
+pip install --prefer-binary -r requirements.txt
 
 echo "=== Running database migrations ==="
 # Only run alembic if DATABASE_URL is PostgreSQL
