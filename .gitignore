@@ -64,5 +64,7 @@ _backup_before_restructure/
 *.png
 !design/
 !design/**
+!docs/logo.png
+!app/public/logo.svg
 # Injective SQLite leftover
 injsight.db

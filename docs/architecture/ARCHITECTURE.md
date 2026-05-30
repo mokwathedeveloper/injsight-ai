@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="../logo.png" alt="InjSight AI" width="80" />
+
+[![Docs](https://img.shields.io/badge/Architecture-System_Design-0066FF?style=for-the-badge)](../architecture/ARCHITECTURE.md)
+
+</div>
+
+---
+
 # System Architecture — InjSight AI
 
 ## Overview

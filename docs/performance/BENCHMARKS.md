@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="../logo.png" alt="InjSight AI" width="80" />
+
+[![Performance](https://img.shields.io/badge/Performance-508×_Faster-22C55E?style=for-the-badge)](../performance/BENCHMARKS.md)
+
+</div>
+
+---
+
 # Performance Benchmarks — InjSight AI
 
 ## Summary

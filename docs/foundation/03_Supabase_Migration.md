@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="../logo.png" alt="InjSight AI" width="80" />
+
+[![Database](https://img.shields.io/badge/Supabase-PostgreSQL_15-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+
+</div>
+
+---
+
 # InjSight AI — Supabase Database Migration
 
 ## Overview

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="app/public/logo.svg" alt="InjSight AI" width="100" />
+<img src="docs/logo.png" alt="InjSight AI" width="160" />
 
-# 🔍 InjSight AI
+# InjSight AI
 
 ### The First AI-Native Wallet Intelligence Platform for Injective DeFi
 
