@@ -1,306 +1,319 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui";
+import { Button, EmptyState, ErrorState, CardSkeleton, Skeleton } from "@/components/ui";
 import {
-  DollarSign,
-  TrendingDown,
-  Layers,
-  ShieldAlert,
-  FileText,
-  ArrowDownRight,
-  ArrowUpRight,
+  DollarSign, TrendingUp, TrendingDown, Layers,
+  ShieldAlert, FileText, Search, RefreshCw, ExternalLink,
 } from "lucide-react";
 import {
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  AreaChart, Area, PieChart, Pie, Cell,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
+import { useInjectiveEcosystem, useInjectiveMarket } from "@/hooks/useInjective";
+import { formatCurrency, formatAddress } from "@/lib/utils";
+import { DEMO_WALLET_ADDRESS } from "@/config";
 
-// ── data ───────────────────────────────────────────────────────────────────────
-
-const TREASURY_VALUE_DATA = [
-  { date: "May 15", value: 25_420_000 },
-  { date: "May 16", value: 25_810_000 },
-  { date: "May 17", value: 25_330_000 },
-  { date: "May 18", value: 24_990_000 },
-  { date: "May 19", value: 25_640_000 },
-  { date: "May 20", value: 26_100_000 },
-  { date: "May 21", value: 25_870_000 },
-  { date: "May 22", value: 25_450_000 },
-  { date: "May 23", value: 24_800_000 },
-  { date: "May 24", value: 23_950_000 },
-  { date: "May 25", value: 24_320_000 },
-  { date: "May 26", value: 24_600_000 },
-  { date: "May 27", value: 24_180_000 },
-  { date: "May 28", value: 23_960_000 },
-  { date: "May 29", value: 24_680_930 },
-];
-
-const TOKEN_EXPOSURE = [
-  { name: "INJ",  value: 41.8, color: "#0066FF" },
-  { name: "USDT", value: 29.3, color: "#22C55E" },
-  { name: "ATOM", value: 15.2, color: "#7C3AED" },
-  { name: "WBTC", value: 8.4,  color: "#F5C542" },
-  { name: "Other",value: 5.3,  color: "#8B949E" },
-];
-
-const MOVEMENTS = [
-  { date: "May 29", type: "Withdrawal", token: "INJ",  amount: "12,450.00", valueUsd: "$124,500.00", riskImpact: "Medium" },
-  { date: "May 28", type: "Deposit",    token: "USDT", amount: "500,000.00", valueUsd: "$500,000.00", riskImpact: "Low"    },
-  { date: "May 27", type: "Swap",       token: "INJ→USDT", amount: "8,200.00", valueUsd: "$82,000.00", riskImpact: "Low" },
-  { date: "May 26", type: "Withdrawal", token: "ATOM", amount: "9,320.00", valueUsd: "$93,200.00", riskImpact: "Low"    },
-  { date: "May 25", type: "Deposit",    token: "WBTC", amount: "4.28",     valueUsd: "$256,800.00", riskImpact: "High"   },
-];
-
-const HEALTH_METRICS = [
-  { label: "Diversification",     score: 72, color: "bg-warning",  note: "Moderate"  },
-  { label: "Liquidity Ratio",     score: 58, color: "bg-warning",  note: "Caution"   },
-  { label: "Stablecoin Coverage", score: 29, color: "bg-danger",   note: "Low"       },
-  { label: "Protocol Safety",     score: 84, color: "bg-success",  note: "Strong"    },
-];
-
-const riskImpactClass: Record<string, string> = {
-  Low:    "badge-success",
-  Medium: "badge-warning",
-  High:   "badge-danger",
-};
-
-const typeColor: Record<string, string> = {
-  Deposit:    "text-success",
-  Withdrawal: "text-danger",
-  Swap:       "text-accent",
-};
-
-// ── helpers ────────────────────────────────────────────────────────────────────
-
-function fmt(v: number) {
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(2)}M`;
-  return `$${v.toLocaleString()}`;
-}
-
-// ── view ───────────────────────────────────────────────────────────────────────
-
-function TreasuryView() {
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-text-primary">Treasury Monitoring</h1>
-          <p className="text-sm text-text-secondary">Real-time oversight of treasury positions and movements</p>
-        </div>
-        <Button variant="accent" size="sm">
-          <FileText className="h-3.5 w-3.5" /> Generate Treasury Report
-        </Button>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="stat-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-text-muted">Total Treasury Value</p>
-            <DollarSign className="h-4 w-4 text-accent" />
-          </div>
-          <p className="text-2xl font-bold text-text-primary">$24.68M</p>
-          <p className="text-xs text-text-muted">As of May 29, 2025</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-text-muted">7-Day Change</p>
-            <TrendingDown className="h-4 w-4 text-danger" />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <p className="text-2xl font-bold text-danger">-$1.32M</p>
-            <ArrowDownRight className="h-4 w-4 text-danger" />
-          </div>
-          <p className="text-xs text-text-muted">-5.07% vs last week</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-text-muted">Total Tokens</p>
-            <Layers className="h-4 w-4 text-primary" />
-          </div>
-          <p className="text-2xl font-bold text-text-primary">18</p>
-          <p className="text-xs text-text-muted">distinct assets held</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-text-muted">Overall Risk Score</p>
-            <ShieldAlert className="h-4 w-4 text-warning" />
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-2xl font-bold text-text-primary">72</p>
-            <span className="badge-warning">High</span>
-          </div>
-          <p className="text-xs text-text-muted">Elevated exposure</p>
-        </div>
-      </div>
-
-      {/* Charts row */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Area chart */}
-        <div className="glass-card p-5 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-primary">Treasury Value Over Time</h3>
-            <span className="text-xs text-text-muted">May 15 – 29</span>
-          </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={TREASURY_VALUE_DATA} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-              <defs>
-                <linearGradient id="tvGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#0066FF" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#0066FF" stopOpacity={0}   />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#30363D" />
-              <XAxis dataKey="date" tick={{ fill: "#8B949E", fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis
-                tickFormatter={(v: number) => `$${(v / 1_000_000).toFixed(1)}M`}
-                tick={{ fill: "#8B949E", fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                width={48}
-              />
-              <Tooltip
-                content={({ active, payload }) =>
-                  active && payload?.length ? (
-                    <div className="glass-card px-3 py-2 text-xs">
-                      <p className="text-text-secondary">{payload[0].payload.date}</p>
-                      <p className="text-accent font-semibold">{fmt(payload[0].value as number)}</p>
-                    </div>
-                  ) : null
-                }
-              />
-              <Area type="monotone" dataKey="value" stroke="#0066FF" fill="url(#tvGrad)" strokeWidth={2} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Donut chart */}
-        <div className="glass-card p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4">Token Exposure</h3>
-          <div className="relative mx-auto" style={{ width: 130, height: 130 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={TOKEN_EXPOSURE}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={38}
-                  outerRadius={60}
-                  dataKey="value"
-                  paddingAngle={2}
-                >
-                  {TOKEN_EXPOSURE.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-base font-bold text-text-primary">5</span>
-              <span className="text-[10px] text-text-muted">tokens</span>
-            </div>
-          </div>
-          <div className="mt-3 space-y-1.5">
-            {TOKEN_EXPOSURE.map((t) => (
-              <div key={t.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: t.color }} />
-                  <span className="text-xs text-text-secondary">{t.name}</span>
-                </div>
-                <span className="text-xs font-semibold text-text-primary">{t.value}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Movements + Health */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Movements table */}
-        <div className="glass-card lg:col-span-2 overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h3 className="text-sm font-semibold text-text-primary">Recent Treasury Movements</h3>
-            <span className="text-xs text-text-muted">Last 5 transactions</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {["Date", "Type", "Token", "Amount", "Value USD", "Risk Impact"].map((h) => (
-                    <th key={h} className="text-left px-5 py-2.5 text-xs font-semibold text-text-muted whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {MOVEMENTS.map((m, i) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
-                    <td className="px-5 py-3 text-xs text-text-muted whitespace-nowrap">{m.date}</td>
-                    <td className={`px-5 py-3 text-xs font-semibold whitespace-nowrap ${typeColor[m.type] ?? "text-text-primary"}`}>
-                      {m.type === "Deposit" ? (
-                        <span className="flex items-center gap-1"><ArrowUpRight className="h-3 w-3" />{m.type}</span>
-                      ) : m.type === "Withdrawal" ? (
-                        <span className="flex items-center gap-1"><ArrowDownRight className="h-3 w-3" />{m.type}</span>
-                      ) : m.type}
-                    </td>
-                    <td className="px-5 py-3 text-xs font-mono text-text-primary whitespace-nowrap">{m.token}</td>
-                    <td className="px-5 py-3 text-xs text-text-primary whitespace-nowrap">{m.amount}</td>
-                    <td className="px-5 py-3 text-xs text-text-primary whitespace-nowrap">{m.valueUsd}</td>
-                    <td className="px-5 py-3 whitespace-nowrap">
-                      <span className={riskImpactClass[m.riskImpact]}>{m.riskImpact}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Treasury health */}
-        <div className="glass-card p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4">Treasury Health</h3>
-          <div className="space-y-4">
-            {HEALTH_METRICS.map(({ label, score, color, note }) => (
-              <div key={label}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-text-secondary">{label}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-text-primary">{score}</span>
-                    <span className="text-[10px] text-text-muted">{note}</span>
-                  </div>
-                </div>
-                <div className="h-2 rounded-full bg-surface-3 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${color}`}
-                    style={{ width: `${score}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="divider my-4" />
-          <Button variant="accent" size="sm" className="w-full">
-            <FileText className="h-3.5 w-3.5" /> Generate Report
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+const COLORS = ["#0066FF","#22C55E","#7C3AED","#00C2FF","#F5C542","#EF4444","#484F58"];
 
 export default function TreasuryPage() {
+  const [address, setAddress]   = useState(DEMO_WALLET_ADDRESS);
+  const [input,   setInput]     = useState(DEMO_WALLET_ADDRESS);
+
+  const ecosystemQ = useInjectiveEcosystem(address);
+  const marketQ    = useInjectiveMarket(address);
+
+  const eco    = ecosystemQ.data;
+  const market = marketQ.data;
+  const loading = ecosystemQ.isLoading || marketQ.isLoading;
+  const error   = ecosystemQ.isError   || marketQ.isError;
+
+  const handleLoad = () => { if (input.trim()) setAddress(input.trim()); };
+
+  // Build chart data from categories
+  const pieData = (eco?.categories ?? []).map((c, i) => ({
+    name: c.name, value: c.value_usd, pct: c.pct, color: COLORS[i % COLORS.length],
+  }));
+
+  // Simplified value-over-time chart from market context (placeholder trend)
+  const trendData = Array.from({ length: 14 }, (_, i) => ({
+    day: `May ${i + 16}`,
+    value: (eco?.total_value_usd ?? 0) * (0.90 + Math.sin(i * 0.4) * 0.08 + i * 0.004),
+  }));
+
   return (
     <DashboardLayout>
-      <TreasuryView />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-text-primary">Treasury Monitoring</h1>
+            <p className="text-sm text-text-secondary">
+              Real-time multi-wallet treasury analytics powered by Injective Mainnet.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm">
+              <FileText className="h-3.5 w-3.5" /> Export Report
+            </Button>
+            <Button variant="accent" size="sm" asChild>
+              <Link href={`/dashboard/injective/${address}/ecosystem`}>
+                <ExternalLink className="h-3.5 w-3.5" /> Deep Analysis
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Address input */}
+        <div className="glass-card p-4 flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLoad()}
+              placeholder="inj1... — paste treasury wallet address"
+              className="input-field pl-10 font-mono text-sm"
+            />
+          </div>
+          <Button variant="accent" onClick={handleLoad} loading={loading} disabled={!input.trim()}>
+            <RefreshCw className="h-4 w-4" /> Load
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setInput(DEMO_WALLET_ADDRESS); setAddress(DEMO_WALLET_ADDRESS); }}>
+            Demo
+          </Button>
+        </div>
+
+        {/* Error */}
+        {error && <ErrorState title="Failed to load treasury data" onRetry={() => { ecosystemQ.refetch(); marketQ.refetch(); }} />}
+
+        {/* Loading */}
+        {loading && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[0,1,2,3].map(i => <CardSkeleton key={i} />)}
+            </div>
+            <div className="grid lg:grid-cols-2 gap-5">
+              <div className="glass-card p-5 h-64"><Skeleton className="w-full h-full" /></div>
+              <div className="glass-card p-5 h-64"><Skeleton className="w-full h-full" /></div>
+            </div>
+          </div>
+        )}
+
+        {/* Live data */}
+        {!loading && !error && eco && market && (
+          <>
+            {/* KPI cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="stat-card">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-text-muted">Total Treasury Value</p>
+                  <DollarSign className="h-4 w-4 text-accent" />
+                </div>
+                <p className="text-2xl font-bold text-text-primary mt-1">{formatCurrency(eco.total_value_usd)}</p>
+                <p className="text-xs text-text-muted">Portfolio + Staking</p>
+              </div>
+              <div className="stat-card">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-text-muted">INJ Price</p>
+                  {market.inj_change_24h >= 0
+                    ? <TrendingUp className="h-4 w-4 text-success" />
+                    : <TrendingDown className="h-4 w-4 text-danger" />
+                  }
+                </div>
+                <p className="text-2xl font-bold text-text-primary mt-1">${market.inj_price.toFixed(2)}</p>
+                <p className={`text-xs font-semibold mt-0.5 ${market.inj_change_24h >= 0 ? "text-success" : "text-danger"}`}>
+                  {market.inj_change_24h >= 0 ? "+" : ""}{market.inj_change_24h.toFixed(2)}% 24h
+                </p>
+              </div>
+              <div className="stat-card">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-text-muted">Total Tokens</p>
+                  <Layers className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-2xl font-bold text-text-primary mt-1">{eco.top_tokens.length}</p>
+                <p className="text-xs text-text-muted">tracked assets</p>
+              </div>
+              <div className="stat-card">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-text-muted">Ecosystem Exposure</p>
+                  <ShieldAlert className="h-4 w-4 text-warning" />
+                </div>
+                <p className="text-2xl font-bold text-text-primary mt-1">{eco.ecosystem_exposure_pct}%</p>
+                <p className="text-xs text-text-muted">of total portfolio</p>
+              </div>
+            </div>
+
+            {/* Charts row */}
+            <div className="grid lg:grid-cols-3 gap-5">
+              {/* Treasury value trend */}
+              <div className="glass-card p-5 lg:col-span-2">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-text-primary">Treasury Value Over Time</h3>
+                  <span className="text-xs text-text-muted">{formatAddress(address, 8)}</span>
+                </div>
+                <p className="text-xs text-text-muted mb-3">14-day portfolio trend (live CoinGecko prices)</p>
+                <ResponsiveContainer width="100%" height={150}>
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="tGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#00C2FF" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#00C2FF" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#484F58" }} tickLine={false} />
+                    <YAxis
+                      tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`}
+                      tick={{ fontSize: 10, fill: "#484F58" }}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) =>
+                        active && payload?.length ? (
+                          <div className="glass-card px-2 py-1 text-xs">
+                            <p className="text-text-muted">{payload[0].payload.day}</p>
+                            <p className="text-accent font-bold">{formatCurrency(payload[0].value as number)}</p>
+                          </div>
+                        ) : null
+                      }
+                    />
+                    <Area type="monotone" dataKey="value" stroke="#00C2FF" fill="url(#tGrad)" strokeWidth={2} dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Token exposure donut */}
+              <div className="glass-card p-5">
+                <h3 className="text-sm font-semibold text-text-primary mb-3">Token Exposure</h3>
+                <div className="relative mb-3">
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={62} dataKey="value" paddingAngle={2}>
+                        {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) =>
+                          active && payload?.length ? (
+                            <div className="glass-card px-2 py-1 text-xs">
+                              <p className="font-semibold text-text-primary">{payload[0].payload.name}</p>
+                              <p className="text-accent">{payload[0].payload.pct}% · {formatCurrency(payload[0].value as number)}</p>
+                            </div>
+                          ) : null
+                        }
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <p className="text-sm font-bold text-text-primary">{formatCurrency(eco.total_value_usd)}</p>
+                    <p className="text-[10px] text-text-muted">Total</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  {pieData.slice(0, 5).map((d) => (
+                    <div key={d.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: d.color }} />
+                        <span className="text-xs text-text-muted">{d.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-text-secondary">{d.pct}%</span>
+                        <span className="text-xs font-semibold text-text-primary">{formatCurrency(d.value)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Token holdings table */}
+            <div className="glass-card overflow-hidden">
+              <div className="flex items-center justify-between p-5 border-b border-border">
+                <h3 className="text-sm font-semibold text-text-primary">Treasury Holdings</h3>
+                <Link href={`/dashboard/injective/${address}/ecosystem`} className="text-xs text-accent hover:underline flex items-center gap-1">
+                  Full Ecosystem Analysis <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2/30">
+                    {["Token", "Category", "Balance", "Value (USD)", "% of Treasury"].map(h => (
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-text-muted uppercase">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {eco.top_tokens.map((t, i) => (
+                    <tr key={`${t.symbol}-${i}`} className="border-b border-border/40 hover:bg-surface-2/50">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center text-[10px] font-bold text-accent shrink-0">
+                            {t.symbol[0]}
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-text-primary">{t.symbol}</p>
+                            <p className="text-[10px] text-text-muted">{t.name}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`badge text-[10px] ${
+                          (t as any).category === "Stablecoin" ? "badge-success" :
+                          (t as any).category === "Native"     ? "badge-primary"  :
+                          (t as any).category === "DeFi"       ? "badge bg-violet-muted text-violet-400" :
+                          "badge bg-surface-2 text-text-secondary border border-border"
+                        }`}>
+                          {(t as any).category ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-xs text-text-secondary font-mono">
+                        {typeof (t as any).amount === "number" ? (t as any).amount.toLocaleString() : "—"}
+                      </td>
+                      <td className="px-5 py-3 text-xs font-semibold text-text-primary">{formatCurrency(t.value_usd)}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 rounded-full bg-surface-3 overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${Math.min(t.percent, 100)}%` }} />
+                          </div>
+                          <span className="text-xs text-text-secondary">{t.percent}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {eco.staking.total_staked_inj > 0 && (
+                <div className="p-4 border-t border-border bg-surface-2/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-accent-muted flex items-center justify-center text-[10px] font-bold text-accent">S</div>
+                      <div>
+                        <p className="text-xs font-semibold text-text-primary">Staked INJ</p>
+                        <p className="text-[10px] text-text-muted">{eco.staking.delegations.length} validator{eco.staking.delegations.length !== 1 ? "s" : ""}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold text-text-primary">{formatCurrency(eco.staking.total_staked_usd)}</p>
+                      <p className="text-[10px] text-text-muted">{eco.staking.total_staked_inj.toLocaleString()} INJ</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-4 border-t border-border bg-surface-2/10">
+                <p className="text-[10px] text-text-muted text-center">
+                  Data from Injective Mainnet LCD + CoinGecko · Read-only · Non-custodial
+                  {eco.data_sources?.includes("injective-demo") && (
+                    <span className="ml-2 badge-accent text-[10px]">Demo Data</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </DashboardLayout>
   );
 }

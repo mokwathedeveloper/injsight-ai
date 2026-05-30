@@ -135,8 +135,8 @@ export function ApiAccessView() {
             ))}
           </tr></thead>
           <tbody>
-            {ENDPOINTS.map(ep=>(
-              <tr key={ep.path} className="border-b border-border/40 hover:bg-surface-2/50">
+            {ENDPOINTS.map((ep, i)=>(
+              <tr key={`${ep.method}-${ep.path}-${i}`} className="border-b border-border/40 hover:bg-surface-2/50">
                 <td className="px-5 py-3"><span className={`badge text-xs font-bold font-mono ${ep.method==="GET"?"bg-success-muted text-success":"bg-primary-muted text-accent"}`}>{ep.method}</span></td>
                 <td className="px-5 py-3"><code className="text-xs text-accent font-mono">{ep.path}</code></td>
                 <td className="px-5 py-3 text-xs text-text-secondary">{ep.desc}</td>
