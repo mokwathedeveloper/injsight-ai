@@ -7,8 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Database — PostgreSQL required (set DATABASE_URL in .env)
-    database_url: str = "postgresql://injsight:injsight@localhost:5432/injsight_db"
+    # Database — PostgreSQL preferred; SQLite used as fallback if not set
+    database_url: str = "sqlite:///./injsight.db"
 
     # Auth
     jwt_secret: str = "change-me-in-production"
