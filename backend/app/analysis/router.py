@@ -27,11 +27,23 @@ def public_analyze(
     db: Session = Depends(get_db),
     user: User | None = Depends(optional_current_user),
 ):
-    """Public analysis — always runs, saves only for authenticated users."""
-    persist  = user is not None
-    user_id  = str(user.id) if user else None
-    run = run_analysis(db, body.walletAddress, user_id=user_id, persist=persist, create_alert=persist)
-    return ok(serialize_analysis(run), "Wallet analysis complete.")
+    """Public analysis with caching — same address returns cached result for 3 min."""
+    from app.core.cache import get as cache_get, set as cache_set, ANALYSIS_TTL
+
+    cache_key = f"analysis:{body.walletAddress.lower()}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        # Still persist for authenticated users if not already saved
+        return ok(cached, "Wallet analysis complete (cached).")
+
+    persist = user is not None
+    user_id = str(user.id) if user else None
+    run     = run_analysis(db, body.walletAddress, user_id=user_id, persist=persist, create_alert=persist)
+    result  = serialize_analysis(run)
+    # Cache only completed analyses (not failures)
+    if result.get("status") == "completed":
+        cache_set(cache_key, result, ANALYSIS_TTL)
+    return ok(result, "Wallet analysis complete.")
 
 
 @public_router.get("/demo-wallet")

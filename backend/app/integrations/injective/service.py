@@ -67,27 +67,41 @@ def _parse_amount(raw: str, decimals: int) -> float:
         return 0.0
 
 
-# ── Price fetching ────────────────────────────────────────────────────────────
+# ── Price fetching (cached 5 min) ────────────────────────────────────────────
+
+_PRICE_CACHE_KEY = "coingecko:prices"
 
 def _fetch_prices_sync() -> dict[str, float]:
+    from app.core.cache import get as cache_get, set as cache_set, PRICE_TTL
+    cached = cache_get(_PRICE_CACHE_KEY)
+    if cached is not None:
+        return cached
     try:
         with httpx.Client(timeout=TIMEOUT) as c:
             r = c.get(f"{COINGECKO_BASE}/simple/price",
                       params={"ids": COINGECKO_IDS, "vs_currencies": "usd"})
             r.raise_for_status()
-            return {k: v.get("usd", 0.0) for k, v in r.json().items()}
+            prices = {k: v.get("usd", 0.0) for k, v in r.json().items()}
+            cache_set(_PRICE_CACHE_KEY, prices, PRICE_TTL)
+            return prices
     except Exception as exc:
         logger.warning("CoinGecko price fetch failed: %s", exc)
         return {}
 
 
 async def _fetch_prices_async() -> dict[str, float]:
+    from app.core.cache import get as cache_get, set as cache_set, PRICE_TTL
+    cached = cache_get(_PRICE_CACHE_KEY)
+    if cached is not None:
+        return cached
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as c:
             r = await c.get(f"{COINGECKO_BASE}/simple/price",
                             params={"ids": COINGECKO_IDS, "vs_currencies": "usd"})
             r.raise_for_status()
-            return {k: v.get("usd", 0.0) for k, v in r.json().items()}
+            prices = {k: v.get("usd", 0.0) for k, v in r.json().items()}
+            cache_set(_PRICE_CACHE_KEY, prices, PRICE_TTL)
+            return prices
     except Exception as exc:
         logger.warning("CoinGecko async price fetch failed: %s", exc)
         return {}
@@ -96,20 +110,32 @@ async def _fetch_prices_async() -> dict[str, float]:
 # ── Balance fetching ──────────────────────────────────────────────────────────
 
 def _fetch_balances_sync(address: str) -> list[dict[str, Any]]:
+    from app.core.cache import get as cache_get, set as cache_set, BALANCE_TTL
+    cache_key = f"lcd:balances:{address}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
     for node in LCD_NODES:
         try:
             with httpx.Client(timeout=TIMEOUT) as c:
                 r = c.get(f"{node}/cosmos/bank/v1beta1/balances/{address}")
                 if r.status_code in (400, 404):
-                    return []           # wallet not found or invalid on this node
+                    return []
                 r.raise_for_status()
-                return r.json().get("balances", [])
+                balances = r.json().get("balances", [])
+                cache_set(cache_key, balances, BALANCE_TTL)
+                return balances
         except Exception as exc:
             logger.debug("LCD node %s failed: %s", node, exc)
     return []
 
 
 async def _fetch_balances_async(address: str) -> list[dict[str, Any]]:
+    from app.core.cache import get as cache_get, set as cache_set, BALANCE_TTL
+    cache_key = f"lcd:balances:{address}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
     for node in LCD_NODES:
         try:
             async with httpx.AsyncClient(timeout=TIMEOUT) as c:
@@ -117,7 +143,9 @@ async def _fetch_balances_async(address: str) -> list[dict[str, Any]]:
                 if r.status_code in (400, 404):
                     return []
                 r.raise_for_status()
-                return r.json().get("balances", [])
+                balances = r.json().get("balances", [])
+                cache_set(cache_key, balances, BALANCE_TTL)
+                return balances
         except Exception as exc:
             logger.debug("LCD async node %s failed: %s", node, exc)
     return []
