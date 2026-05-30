@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Self-host fonts via Google Fonts with display=swap for perf */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap&subset=latin');
 
 @tailwind base;
 @tailwind components;
@@ -133,4 +134,49 @@
     scrollbar-width: none;
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* ── Mobile-first responsive tables ── */
+  .table-responsive {
+    @apply w-full overflow-x-auto -mx-0;
+  }
+  .table-responsive table {
+    @apply min-w-[600px];
+  }
+
+  /* ── Responsive stat cards ── */
+  @media (max-width: 639px) {
+    .stat-card {
+      @apply p-3;
+    }
+    .stat-card p:nth-child(2) {
+      @apply text-xl;
+    }
+  }
+
+  /* ── Touch-friendly tap targets ── */
+  @media (max-width: 1023px) {
+    .nav-link, button, [role="button"] {
+      min-height: 44px;
+    }
+  }
+
+  /* ── Prevent horizontal overflow on mobile ── */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    overflow-x: hidden;
+  }
+
+  /* ── Responsive chart containers ── */
+  .chart-container {
+    @apply w-full;
+    min-height: 120px;
+  }
+
+  /* ── Performance: will-change only where needed ── */
+  .glass-card-hover {
+    will-change: transform;
+  }
+  .glass-card-hover:not(:hover) {
+    will-change: auto;
+  }
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -14,14 +13,17 @@ export function Logo({ className, size = "md" }: LogoProps) {
 
   return (
     <Link href="/" className={cn("flex items-center gap-2 shrink-0", className)}>
-      <Image
-        src="/logo.png"
-        alt="InjSight AI logo"
+      {/* SVG logo — <1KB vs 866KB PNG */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo.svg"
+        alt="InjSight AI"
         width={dim}
         height={dim}
         style={{ width: dim, height: dim }}
-        className="rounded-lg object-contain"
-        priority
+        className="rounded-lg"
+        loading="eager"
+        decoding="sync"
       />
       <span className={cn("font-bold text-text-primary", textSizes[size])}>
         InjSight <span className="text-accent">AI</span>

@@ -41,8 +41,9 @@ const powerNav = [
   { href: "/admin",                label: "Admin",       icon: BarChart3 },
 ];
 
-function NavItem({ href, label, icon: Icon, badge, pathname }: {
-  href: string; label: string; icon: React.ElementType; badge?: number; pathname: string;
+function NavItem({ href, label, icon: Icon, badge, pathname, onNavigate }: {
+  href: string; label: string; icon: React.ElementType;
+  badge?: number; pathname: string; onNavigate?: () => void;
 }) {
   const active = pathname === href || (
     !href.includes("?") && href !== "/dashboard" && pathname.startsWith(href)
@@ -50,6 +51,7 @@ function NavItem({ href, label, icon: Icon, badge, pathname }: {
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className={cn(
         "flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13px] font-medium transition-colors duration-150",
         active
@@ -68,7 +70,12 @@ function NavItem({ href, label, icon: Icon, badge, pathname }: {
   );
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  /** Called after any nav link is clicked — used to close the mobile drawer. */
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
 
   return (
@@ -84,14 +91,14 @@ export function Sidebar() {
       {/* Main nav */}
       <nav className="flex-1 px-2 py-3 space-y-0.5">
         {mainNav.map((item) => (
-          <NavItem key={item.href} {...item} pathname={pathname} />
+          <NavItem key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
 
         <div className="pt-3 pb-1">
           <p className="section-label px-3 mb-1.5">🔗 Injective Chain</p>
         </div>
         {injectiveNav.map((item) => (
-          <NavItem key={item.href} {...item} pathname={pathname} />
+          <NavItem key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
 
         <div className="pt-3 pb-1">
@@ -99,7 +106,7 @@ export function Sidebar() {
         </div>
 
         {powerNav.map((item) => (
-          <NavItem key={item.href} {...item} pathname={pathname} />
+          <NavItem key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
       </nav>
 
