@@ -1,3 +1,9 @@
+<div align="center">
+
+<img src="docs/logo.png" alt="InjSight AI" width="90" />
+
+</div>
+
 # Security Policy — InjSight AI
 
 [![Security](https://img.shields.io/badge/Security-Read--Only_·_Non--Custodial-22C55E?style=for-the-badge)](SECURITY.md)

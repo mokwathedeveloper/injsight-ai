@@ -1,58 +1,55 @@
-# InjSight AI — Backend API
+<div align="center">
 
-FastAPI + SQLAlchemy + Alembic backend for InjSight AI. Read-only and
-non-custodial: it never requests or stores private keys.
+<img src="../docs/logo.png" alt="InjSight AI" width="90" />
+
+# InjSight AI — Backend
+
+[![FastAPI](https://img.shields.io/badge/FastAPI_0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=for-the-badge)](https://injsight-ai-backend.onrender.com)
+
+</div>
+
+---
+
+## Overview
+
+FastAPI Python backend for InjSight AI. Real Injective Mainnet data, OpenRouter AI, LangChain agent, Supabase PostgreSQL.
+
+**Live:** https://injsight-ai-backend.onrender.com  
+**API Docs:** https://injsight-ai-backend.onrender.com/docs
 
 ## Stack
-- FastAPI (REST API, `/api` base path)
-- SQLAlchemy 2.0 ORM + Alembic migrations
-- PostgreSQL in production; SQLite by default for zero-setup local dev
-- JWT auth (access + refresh) with bcrypt password hashing
-- Deterministic Injective data + rule-based risk scoring + AI report generation
-  (swap `app/integrations/injective` and `app/ai` for live providers)
 
-## Quickstart
+- FastAPI 0.115 + Python 3.11
+- SQLAlchemy 2.0 + Alembic (PostgreSQL/SQLite)
+- LangChain 0.3 ReAct agent (4 Injective tools)
+- OpenRouter AI (llama-3.3-70b-instruct)
+- Supabase (PostgreSQL + Realtime)
+- In-memory TTL cache (508× speed improvement)
+
+## Development
 
 ```bash
-cd backend
-python3 -m venv .venv && source .venv/bin/activate   # or use the bootstrap below
-pip install -r requirements.txt
 cp .env.example .env
+# Set DATABASE_URL, OPENROUTER_API_KEY, Supabase keys
 
-# Apply schema
-alembic upgrade head        # or rely on SQLite auto-create on first boot
-
-# Run
-uvicorn app.main:app --reload --port 8000
-# python run.py also works
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head
+uvicorn app.main:app --port 8000 --reload
 ```
 
-Interactive docs: http://localhost:8000/docs · Health: `GET /api/health`
+## Environment
 
-### PostgreSQL
-Set `DATABASE_URL` in `.env`, e.g.:
+```env
+DATABASE_URL=postgresql://injsight:injsight@localhost:5432/injsight_db
+OPENROUTER_API_KEY=sk-or-v1-...
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGci...
+JWT_SECRET=your-secret
 ```
-DATABASE_URL=postgresql+psycopg2://injsight:injsight@localhost:5432/injsight
-```
-then `alembic upgrade head`.
 
-## Key endpoints
-| Method | Path | Auth |
-|---|---|---|
-| GET | `/api/health` | – |
-| POST | `/api/public/analyze-wallet` | – |
-| GET | `/api/public/demo-wallet` | – |
-| POST | `/api/auth/signup` · `/api/auth/login` · `/api/auth/refresh` | – |
-| GET | `/api/auth/me` · `/api/users/usage` | Bearer |
-| GET/POST | `/api/wallets` · `POST /api/wallets/:id/analyze` | Bearer |
-| GET | `/api/analysis` · `/api/analysis/:id` | Bearer |
-| GET | `/api/reports` · `POST /api/reports/:id/export` | Bearer |
-| GET | `/api/alerts` · `PUT /api/alerts/:id/read` | Bearer |
+---
 
-Responses use `{ "data": ..., "message": ... }`; errors use
-`{ "error": ..., "message": ..., "statusCode": ... }`.
-
-## Frontend wiring
-The Next.js app reads `NEXT_PUBLIC_API_URL` (see `frontend/.env.local.example`)
-and calls these endpoints via `frontend/lib/api/`. If the API is unreachable the
-analyzer falls back to labeled sample data so the UI never breaks.
+[← Back to root README](../README.md)

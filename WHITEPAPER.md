@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/public/logo.svg" alt="InjSight AI" width="80" />
+<img src="docs/logo.png" alt="InjSight AI" width="120" />
 
 # InjSight AI — Technical Whitepaper
 

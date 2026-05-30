@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="../logo.png" alt="InjSight AI" width="80" />
+
+[![Hackathon](https://img.shields.io/badge/Injective_Solo_AI_Builder_Sprint-May_2026-7C3AED?style=for-the-badge)](https://injective.com)
+
+</div>
+
+---
+
 # Hackathon Submission Checklist — InjSight AI
 
 **Event:** Injective Solo AI Builder Sprint — May 11–31, 2026
