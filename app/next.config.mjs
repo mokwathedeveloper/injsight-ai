@@ -74,12 +74,11 @@ const nextConfig = {
 
   // ── Experimental ──────────────────────────────────────────────────────────
   experimental: {
-    optimizeCss:            true,  // critters inline critical CSS
+    // optimizeCss removed — requires 'critters' package, breaks Vercel build
     optimizePackageImports: [
       "lucide-react",
       "recharts",
       "@tanstack/react-query",
-      "framer-motion",
     ],
   },
 };
