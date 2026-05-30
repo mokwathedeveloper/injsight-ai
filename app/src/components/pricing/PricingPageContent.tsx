@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Check, X, Zap, Shield, Crown } from "lucide-react";
+import { Check, X, Zap, Crown } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useAuthStore } from "@/store/authStore";
 
@@ -66,7 +65,6 @@ function PlanButton({
   currentPlan: string;
   isLoggedIn: boolean;
 }) {
-  const router = useRouter();
   const isCurrent = currentPlan.toLowerCase() === plan.id;
   const isDowngrade =
     (currentPlan === "pro"  && plan.id === "free") ||
@@ -88,10 +86,10 @@ function PlanButton({
         </Button>
       );
     }
-    // Upgrade
+    // Upgrade → go to the upgrade/payment page
     return (
       <Button variant={plan.popular ? "accent" : "secondary"} className="w-full" asChild>
-        <Link href="/billing">
+        <Link href={`/upgrade?plan=${plan.id}`}>
           <Zap className="h-3.5 w-3.5" />
           Upgrade to {plan.name}
         </Link>
