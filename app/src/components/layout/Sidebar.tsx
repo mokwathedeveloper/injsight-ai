@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Search, Wallet, FileText, Bell, Star,
   Sparkles, Settings, History, Zap, ChevronRight, Landmark,
   Webhook, CreditCard, Users, Code2, Shield, MessageSquare,
-  CalendarDays, BarChart3, FlaskConical,
+  CalendarDays, BarChart3, FlaskConical, Globe,
 } from "lucide-react";
 
 const mainNav = [
@@ -25,6 +25,10 @@ const mainNav = [
   { href: "/dashboard/weekly-reports", label: "Weekly Reports",  icon: CalendarDays },
   { href: "/dashboard/history",        label: "History",         icon: History },
   { href: "/dashboard/settings",       label: "Settings",        icon: Settings },
+];
+
+const injectiveNav = [
+  { href: "/dashboard/injective",  label: "Injective Hub", icon: Globe },
 ];
 
 const powerNav = [
@@ -80,6 +84,13 @@ export function Sidebar() {
       {/* Main nav */}
       <nav className="flex-1 px-2 py-3 space-y-0.5">
         {mainNav.map((item) => (
+          <NavItem key={item.href} {...item} pathname={pathname} />
+        ))}
+
+        <div className="pt-3 pb-1">
+          <p className="section-label px-3 mb-1.5">🔗 Injective Chain</p>
+        </div>
+        {injectiveNav.map((item) => (
           <NavItem key={item.href} {...item} pathname={pathname} />
         ))}
 
