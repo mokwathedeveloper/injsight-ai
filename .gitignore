@@ -68,3 +68,10 @@ _backup_before_restructure/
 !app/public/logo.svg
 # Injective SQLite leftover
 injsight.db
+
+# ── Local-only files (never push) ──────────────────────
+# Demo video script — personal notes, not for repo
+DEMO_VIDEO_SCRIPT.md
+# Any personal notes or drafts
+NOTES.md
+DRAFT*.md
