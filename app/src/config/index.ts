@@ -5,7 +5,10 @@ export const APP_TAGLINE = "Understand Any Injective Wallet in Seconds";
 
 export const INJECTIVE_CHAIN_ID = "injective-1";
 
-export const DEMO_WALLET_ADDRESS = "inj1qg5ega6dykkxc307y25pecuufrjkxkaggkkxh";
+// Demo wallet — uses deterministic portfolio with live CoinGecko prices
+// The backend's _demo_portfolio() function generates a realistic INJ/USDC/TIA split
+// keyed off this address. Data source shown as "injective-demo" in the UI.
+export const DEMO_WALLET_ADDRESS = "inj14au322k9munkmx5wrchz9q30juf5wjgz2cfqku";
 
 export const RISK_THRESHOLDS = {
   low:      [0,  30],

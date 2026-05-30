@@ -4,12 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
-import { Search, Shield, TrendingUp, Brain, ArrowRight, Play } from "lucide-react";
+import { Search, Shield, TrendingUp, Brain, ArrowRight, Play, LayoutDashboard, Sparkles } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 const PARTNER_LOGOS = ["INJECTIVE", "HELIX", "ASTROPORT", "LEVANA", "MITO"];
 
 export function HeroSection() {
-  const router = useRouter();
+  const router     = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+  const loggedIn   = isAuthenticated();
+  const firstName  = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "back";
   const [address, setAddress] = useState("");
 
   const handleAnalyze = () => {
@@ -83,17 +87,41 @@ export function HeroSection() {
               </span>
             </div>
 
-            {/* CTAs */}
-            <div className="flex items-center gap-3">
-              <Button variant="primary" size="lg" asChild>
-                <Link href="/signup">Start Analyzing Free</Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild>
-                <Link href="/analyze?demo=true">
-                  <Play className="h-4 w-4" /> Try Demo Wallet
-                </Link>
-              </Button>
-            </div>
+            {/* CTAs — change based on auth state */}
+            {loggedIn ? (
+              <div className="space-y-3">
+                {/* Logged-in welcome */}
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success-muted border border-success/20 w-fit">
+                  <Sparkles className="h-4 w-4 text-success shrink-0" />
+                  <span className="text-sm font-semibold text-success">
+                    Welcome back, {firstName}! You&apos;re signed in.
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button variant="accent" size="lg" asChild>
+                    <Link href="/dashboard">
+                      <LayoutDashboard className="h-4 w-4" /> Go to Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="secondary" size="lg" asChild>
+                    <Link href="/analyze">
+                      <Search className="h-4 w-4" /> Analyze a Wallet
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button variant="primary" size="lg" asChild>
+                  <Link href="/signup">Start Analyzing Free</Link>
+                </Button>
+                <Button variant="ghost" size="lg" asChild>
+                  <Link href="/analyze?demo=true">
+                    <Play className="h-4 w-4" /> Try Demo Wallet
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {/* Partner logos */}
             <div className="pt-4">
