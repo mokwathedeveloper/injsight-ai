@@ -3,7 +3,8 @@
 ## 1. Product Identity
 
 **Product Name:** InjSight AI  
-**Repository Name:** `injsight-ai`  
+**Repository Name:** `i
+`  
 **Product Subtitle:** AI Wallet Intelligence for Injective DeFi  
 **Category:** AI Wallet Intelligence / DeFi Analytics / On-Chain Risk Intelligence  
 

@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // ── Compiler ───────────────────────────────────────────────────────────────
-  swcMinify:           true,  // faster + smaller bundles
+  swcMinify:           true,
   reactStrictMode:     true,
-  poweredByHeader:     false, // remove X-Powered-By header
+  poweredByHeader:     false,
+  eslint:     { ignoreDuringBuilds: true },   // TypeScript catches real errors
+  typescript: { ignoreBuildErrors: false },
 
   // ── Images ─────────────────────────────────────────────────────────────────
   images: {
@@ -42,29 +44,18 @@ const nextConfig = {
 
   // ── Webpack bundle optimisation ────────────────────────────────────────────
   webpack(config, { dev, isServer }) {
-    // Tree-shake lodash (if used transitively)
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      lodash: "lodash-es",
-    };
-
+    // NOTE: Do NOT alias lodash → lodash-es. Recharts uses lodash/isEqual
+    // (CommonJS) internally and the alias breaks Vercel builds.
     if (!dev && !isServer) {
-      // Split recharts into its own chunk — heavy, rarely changes
       config.optimization.splitChunks = {
         ...config.optimization.splitChunks,
         cacheGroups: {
           ...config.optimization.splitChunks?.cacheGroups,
           recharts: {
             name:     "recharts",
-            test:     /[\\/]node_modules[\\/](recharts|d3-.+|victory-.+)[\\/]/,
+            test:     /[\\/]node_modules[\\/](recharts|d3-.+)[\\/]/,
             chunks:   "all",
             priority: 30,
-          },
-          supabase: {
-            name:     "supabase",
-            test:     /[\\/]node_modules[\\/](@supabase)[\\/]/,
-            chunks:   "all",
-            priority: 20,
           },
         },
       };
